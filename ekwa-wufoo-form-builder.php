@@ -137,8 +137,9 @@ function ekwa_wufoo_form_builder_register_blocks() {
         'render_callback' => 'ekwa_wufoo_form_radio_render',
         'attributes' => array(
             'label' => array('type' => 'string', 'default' => 'Radio Group Label'),
-            'fieldId' => array('type' => 'string', 'default' => ''),
+            'fieldName' => array('type' => 'string', 'default' => ''),
             'options' => array('type' => 'string', 'default' => 'Option 1,Option 2,Option 3'),
+            'optionIds' => array('type' => 'string', 'default' => ''),
             'selectedValue' => array('type' => 'string', 'default' => ''),
             'validationMessage' => array('type' => 'string', 'default' => '')
         )
@@ -274,22 +275,32 @@ function ekwa_wufoo_form_checkbox_render( $attributes ) {
 // Render callback for radio block
 function ekwa_wufoo_form_radio_render( $attributes ) {
     $label = esc_html( $attributes['label'] );
-    $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'radio-' . uniqid();
+    $field_name = !empty( $attributes['fieldName'] ) ? esc_attr( $attributes['fieldName'] ) : 'radio-' . uniqid();
     $options_string = $attributes['options'];
+    $option_ids_string = $attributes['optionIds'];
     $selected_value = esc_attr( $attributes['selectedValue'] );
     $validation_message = esc_html( $attributes['validationMessage'] );
 
     $options_array = explode( ',', $options_string );
+    $ids_array = explode( ',', $option_ids_string );
     $options_html = '';
 
     foreach ( $options_array as $index => $option ) {
         $option = trim( $option );
         if ( !empty( $option ) ) {
-            $option_id = $field_id . '_' . $index;
+            // Use custom ID if provided, otherwise generate one
+            $option_id = !empty( $ids_array[$index] ) ? trim( $ids_array[$index] ) : $field_name . '_' . $index;
+            $option_id = esc_attr( $option_id );
             $checked = ($selected_value === $option) ? 'checked="checked"' : '';
+
             $options_html .= sprintf(
-                '<label for="%s" style="display: block; margin-bottom: 8px;"><input type="radio" id="%s" name="%s" value="%s" %s style="margin-right: 8px;" /> %s</label>',
-                $option_id, $option_id, $field_id, esc_attr($option), $checked, esc_html($option)
+                '<label for="%s" style="display: block; margin-bottom: 8px;"><input id="%s" name="%s" type="radio" class="field radio" value="%s" %s tabindex="0" style="margin-right: 8px;" /> %s</label>',
+                $option_id,
+                $option_id,
+                $field_name,
+                esc_attr($option),
+                $checked,
+                esc_html($option)
             );
         }
     }

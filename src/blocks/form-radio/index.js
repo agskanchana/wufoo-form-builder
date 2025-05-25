@@ -15,13 +15,17 @@ registerBlockType('ekwa-wufoo/form-radio', {
             type: 'string',
             default: 'Radio Group Label',
         },
-        fieldId: {
+        fieldName: {
             type: 'string',
             default: ''
         },
         options: {
             type: 'string',
             default: 'Option 1,Option 2,Option 3'
+        },
+        optionIds: {
+            type: 'string',
+            default: ''
         },
         selectedValue: {
             type: 'string',
