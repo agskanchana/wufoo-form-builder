@@ -6,7 +6,7 @@ registerBlockType('ekwa-wufoo/form-textarea', {
     title: 'Form Textarea',
     icon: 'text',
     category: 'widgets',
-    parent: ['ekwa-wufoo/form-builder'],
+    parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
         reusable: false,
     },

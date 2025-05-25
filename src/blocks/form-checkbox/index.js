@@ -6,7 +6,7 @@ registerBlockType('ekwa-wufoo/form-checkbox', {
     title: 'Form Checkbox',
     icon: 'yes',
     category: 'widgets',
-    parent: ['ekwa-wufoo/form-builder'],
+    parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
         reusable: false,
     },

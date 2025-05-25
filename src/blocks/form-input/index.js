@@ -6,7 +6,7 @@ registerBlockType('ekwa-wufoo/form-input', {
     title: 'Form Input',
     icon: 'edit',
     category: 'widgets',
-    parent: ['ekwa-wufoo/form-builder'],
+    parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
         reusable: false,
     },

@@ -6,7 +6,7 @@ registerBlockType('ekwa-wufoo/form-select', {
     title: 'Form Select',
     icon: 'list-view',
     category: 'widgets',
-    parent: ['ekwa-wufoo/form-builder'],
+    parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
         reusable: false,
     },

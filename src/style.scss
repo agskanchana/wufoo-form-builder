@@ -88,4 +88,43 @@
             }
         }
     }
+
+    .wp-block-group.form-section {
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        background: #fafafa;
+    }
+
+    .wp-block-columns {
+        margin: 20px 0;
+    }
+
+    .wp-block-column {
+        padding: 0 10px;
+    }
+
+    // Form field spacing within columns and groups
+    .wp-block-group,
+    .wp-block-column {
+        .form-input,
+        .form-select,
+        .form-textarea,
+        .form-checkbox,
+        .form-radio {
+            margin-bottom: 15px;
+        }
+    }
+
+    // Better spacing for headings and paragraphs
+    .wp-block-heading {
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .wp-block-paragraph {
+        margin-bottom: 20px;
+        color: #666;
+    }
 }

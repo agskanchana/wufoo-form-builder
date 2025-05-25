@@ -6,7 +6,7 @@ registerBlockType('ekwa-wufoo/form-radio', {
     title: 'Form Radio Group',
     icon: 'marker',
     category: 'widgets',
-    parent: ['ekwa-wufoo/form-builder'],
+    parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
         reusable: false,
     },

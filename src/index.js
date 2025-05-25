@@ -49,19 +49,43 @@ registerBlockType('ekwa-wufoo/form-builder', {
 
         const { formId, submitText, actionUrl, idStamp } = attributes;
 
+        // Allow WordPress core blocks + form child blocks
         const ALLOWED_BLOCKS = [
+            // WordPress Core Blocks
+            'core/group',
+            'core/columns',
+            'core/column',
+            'core/heading',
+            'core/paragraph',
+            'core/spacer',
+            'core/separator',
+            // Form Child Blocks
             'ekwa-wufoo/form-input',
             'ekwa-wufoo/form-select',
             'ekwa-wufoo/form-checkbox',
             'ekwa-wufoo/form-radio',
             'ekwa-wufoo/form-textarea'
         ];
+
+        // Template with a basic layout example
         const TEMPLATE = [
-            ['ekwa-wufoo/form-input', {}],
-            ['ekwa-wufoo/form-select', {}],
-            ['ekwa-wufoo/form-checkbox', {}],
-            ['ekwa-wufoo/form-radio', {}],
-            ['ekwa-wufoo/form-textarea', {}],
+            ['core/heading', { level: 3, content: 'Contact Form' }],
+            ['core/paragraph', { content: 'Please fill out the form below:' }],
+            ['core/group', {
+                className: 'form-section'
+            }, [
+                ['ekwa-wufoo/form-input', { label: 'Name', fieldId: 'name', required: true }],
+                ['ekwa-wufoo/form-input', { label: 'Email', fieldId: 'email', inputType: 'email', required: true }]
+            ]],
+            ['core/columns', {}, [
+                ['core/column', {}, [
+                    ['ekwa-wufoo/form-input', { label: 'Phone', fieldId: 'phone' }]
+                ]],
+                ['core/column', {}, [
+                    ['ekwa-wufoo/form-select', { label: 'Subject', fieldId: 'subject', options: 'General Inquiry,Support,Sales' }]
+                ]]
+            ]],
+            ['ekwa-wufoo/form-textarea', { label: 'Message', fieldId: 'message', rows: 5, required: true }]
         ];
 
         return (
@@ -98,6 +122,7 @@ registerBlockType('ekwa-wufoo/form-builder', {
                         <InnerBlocks
                             allowedBlocks={ALLOWED_BLOCKS}
                             template={TEMPLATE}
+                            templateLock={false}
                         />
                         <div className="form-submit">
                             <button
