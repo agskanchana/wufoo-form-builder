@@ -33,6 +33,10 @@ registerBlockType('ekwa-wufoo/form-builder', {
         actionUrl: {
             type: 'string',
             default: ''
+        },
+        idStamp: {
+            type: 'string',
+            default: ''
         }
     },
     supports: {
@@ -43,7 +47,7 @@ registerBlockType('ekwa-wufoo/form-builder', {
             className: 'ekwa-wufoo-form-builder'
         });
 
-        const { submitText, actionUrl } = attributes;
+        const { formId, submitText, actionUrl, idStamp } = attributes;
 
         const ALLOWED_BLOCKS = [
             'ekwa-wufoo/form-input',
@@ -65,6 +69,12 @@ registerBlockType('ekwa-wufoo/form-builder', {
                 <InspectorControls>
                     <PanelBody title={__('Form Settings', 'ekwa-wufoo-form-builder')}>
                         <TextControl
+                            label={__('Form ID', 'ekwa-wufoo-form-builder')}
+                            value={formId}
+                            onChange={(value) => setAttributes({ formId: value })}
+                            help={__('Unique identifier for the form (used for id and name attributes)', 'ekwa-wufoo-form-builder')}
+                        />
+                        <TextControl
                             label={__('Form Action URL', 'ekwa-wufoo-form-builder')}
                             value={actionUrl}
                             onChange={(value) => setAttributes({ actionUrl: value })}
@@ -75,10 +85,16 @@ registerBlockType('ekwa-wufoo/form-builder', {
                             value={submitText}
                             onChange={(value) => setAttributes({ submitText: value })}
                         />
+                        <TextControl
+                            label={__('Form ID Stamp', 'ekwa-wufoo-form-builder')}
+                            value={idStamp}
+                            onChange={(value) => setAttributes({ idStamp: value })}
+                            help={__('ID stamp code to be inserted after submit button', 'ekwa-wufoo-form-builder')}
+                        />
                     </PanelBody>
                 </InspectorControls>
                 <div {...blockProps}>
-                    <form>
+                    <form id={formId || 'ekwa-form'} name={formId || 'ekwa-form'}>
                         <InnerBlocks
                             allowedBlocks={ALLOWED_BLOCKS}
                             template={TEMPLATE}
@@ -92,6 +108,11 @@ registerBlockType('ekwa-wufoo/form-builder', {
                                 {submitText}
                             </button>
                         </div>
+                        {idStamp && (
+                            <div className="form-idstamp" style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                                ID Stamp: {idStamp}
+                            </div>
+                        )}
                     </form>
                 </div>
             </Fragment>

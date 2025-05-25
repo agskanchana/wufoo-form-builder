@@ -89,6 +89,10 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'actionUrl' => array(
                 'type' => 'string',
                 'default' => ''
+            ),
+            'idStamp' => array(
+                'type' => 'string',
+                'default' => ''
             )
         )
     ) );
@@ -156,16 +160,28 @@ add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
 // Render callback for parent form block
 function ekwa_wufoo_form_builder_render( $attributes, $content ) {
-    $form_id = !empty( $attributes['formId'] ) ? $attributes['formId'] : 'ekwa-form-' . uniqid();
-    $submit_text = !empty( $attributes['submitText'] ) ? $attributes['submitText'] : 'Submit';
+    $form_id = !empty( $attributes['formId'] ) ? esc_attr( $attributes['formId'] ) : 'ekwa-form-' . uniqid();
+    $submit_text = !empty( $attributes['submitText'] ) ? esc_html( $attributes['submitText'] ) : 'Submit';
     $action_url = !empty( $attributes['actionUrl'] ) ? esc_url( $attributes['actionUrl'] ) : '';
+    $id_stamp = !empty( $attributes['idStamp'] ) ? esc_attr( $attributes['idStamp'] ) : '';
+
+    // Build ID stamp HTML as hidden input if provided
+    $id_stamp_html = '';
+    if ( !empty( $id_stamp ) ) {
+        $id_stamp_html = sprintf(
+            '<input type="hidden" id="idstamp" name="idstamp" value="%s">',
+            $id_stamp
+        );
+    }
 
     return sprintf(
-        '<div class="ekwa-wufoo-form-builder"><form id="%s" method="post" action="%s">%s<div class="form-submit"><button type="submit" class="submit-button primary">%s</button></div></form></div>',
-        esc_attr( $form_id ),
+        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit"><button type="submit" class="submit-button primary">%s</button></div>%s</form></div>',
+        $form_id,
+        $form_id,
         $action_url,
         $content,
-        esc_html( $submit_text )
+        $submit_text,
+        $id_stamp_html
     );
 }
 
