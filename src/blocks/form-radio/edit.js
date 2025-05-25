@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { TextControl, TextareaControl, SelectControl } from '@wordpress/components';
+import { TextControl, TextareaControl, SelectControl, ToggleControl } from '@wordpress/components';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
@@ -8,7 +8,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
     const blockProps = useBlockProps({
         className: `form-radio ${isSelected ? 'is-selected' : ''}`
     });
-    const { label, fieldName, options, optionIds, selectedValue, validationMessage } = attributes;
+    const { label, fieldName, options, optionIds, selectedValue, required, validationMessage } = attributes;
 
     const optionsArray = options.split(',').map(option => option.trim()).filter(option => option);
     const idsArray = optionIds.split(',').map(id => id.trim()).filter(id => id);
@@ -69,16 +69,26 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         ]}
                         onChange={(value) => setAttributes({ selectedValue: value })}
                     />
-                    <TextControl
-                        label={__('Validation Message', 'ekwa-wufoo-form-builder')}
-                        value={validationMessage}
-                        onChange={(value) => setAttributes({ validationMessage: value })}
+                    <ToggleControl
+                        label={__('Required Field', 'ekwa-wufoo-form-builder')}
+                        checked={required}
+                        onChange={(value) => setAttributes({ required: value })}
+                        help={__('Make this field mandatory', 'ekwa-wufoo-form-builder')}
                     />
+                    {required && (
+                        <TextControl
+                            label={__('Validation Message', 'ekwa-wufoo-form-builder')}
+                            value={validationMessage}
+                            onChange={(value) => setAttributes({ validationMessage: value })}
+                        />
+                    )}
                 </PanelBody>
             </InspectorControls>
             <div {...blockProps}>
                 <fieldset>
-                    <legend>{label}</legend>
+                    <legend>
+                        {label} {required && <span style={{ color: 'red' }}>*</span>}
+                    </legend>
                     {optionsArray.map((option, index) => {
                         const radioId = idsArray[index] || `radio_${index}`;
                         return (
@@ -97,7 +107,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         );
                     })}
                 </fieldset>
-                {validationMessage && (
+                {required && validationMessage && (
                     <span className="validation-message" style={{ color: '#d94f4f', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                         {validationMessage}
                     </span>

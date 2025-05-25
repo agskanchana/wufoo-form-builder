@@ -27,6 +27,10 @@ registerBlockType('ekwa-wufoo/form-textarea', {
             type: 'number',
             default: 4
         },
+        required: {
+            type: 'boolean',
+            default: false
+        },
         validationMessage: {
             type: 'string',
             default: ''

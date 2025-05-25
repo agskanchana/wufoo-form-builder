@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { TextControl, SelectControl } from '@wordpress/components';
+import { TextControl, SelectControl, ToggleControl } from '@wordpress/components';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
@@ -8,7 +8,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
     const blockProps = useBlockProps({
         className: `form-input ${isSelected ? 'is-selected' : ''}`
     });
-    const { label, placeholder, inputType, fieldId, validationMessage } = attributes;
+    const { label, placeholder, inputType, fieldId, required, validationMessage } = attributes;
 
     return (
         <Fragment>
@@ -41,16 +41,26 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         ]}
                         onChange={(value) => setAttributes({ inputType: value })}
                     />
-                    <TextControl
-                        label={__('Validation Message', 'ekwa-wufoo-form-builder')}
-                        value={validationMessage}
-                        onChange={(value) => setAttributes({ validationMessage: value })}
-                        help={__('Message to display when validation fails', 'ekwa-wufoo-form-builder')}
+                    <ToggleControl
+                        label={__('Required Field', 'ekwa-wufoo-form-builder')}
+                        checked={required}
+                        onChange={(value) => setAttributes({ required: value })}
+                        help={__('Make this field mandatory', 'ekwa-wufoo-form-builder')}
                     />
+                    {required && (
+                        <TextControl
+                            label={__('Validation Message', 'ekwa-wufoo-form-builder')}
+                            value={validationMessage}
+                            onChange={(value) => setAttributes({ validationMessage: value })}
+                            help={__('Message to display when validation fails', 'ekwa-wufoo-form-builder')}
+                        />
+                    )}
                 </PanelBody>
             </InspectorControls>
             <div {...blockProps}>
-                <label htmlFor={fieldId}>{label}</label>
+                <label htmlFor={fieldId}>
+                    {label} {required && <span style={{ color: 'red' }}>*</span>}
+                </label>
                 <input
                     type={inputType}
                     id={fieldId}
@@ -58,7 +68,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                     placeholder={placeholder}
                     disabled
                 />
-                {validationMessage && (
+                {required && validationMessage && (
                     <span className="validation-message" style={{ color: '#d94f4f', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                         {validationMessage}
                     </span>

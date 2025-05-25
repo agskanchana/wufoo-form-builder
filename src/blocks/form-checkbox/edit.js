@@ -8,7 +8,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
     const blockProps = useBlockProps({
         className: `form-checkbox ${isSelected ? 'is-selected' : ''}`
     });
-    const { label, fieldId, value, checked, validationMessage } = attributes;
+    const { label, fieldId, value, checked, required, validationMessage } = attributes;
 
     return (
         <Fragment>
@@ -36,11 +36,20 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         checked={checked}
                         onChange={(value) => setAttributes({ checked: value })}
                     />
-                    <TextControl
-                        label={__('Validation Message', 'ekwa-wufoo-form-builder')}
-                        value={validationMessage}
-                        onChange={(value) => setAttributes({ validationMessage: value })}
+                    <ToggleControl
+                        label={__('Required Field', 'ekwa-wufoo-form-builder')}
+                        checked={required}
+                        onChange={(value) => setAttributes({ required: value })}
+                        help={__('Make this field mandatory', 'ekwa-wufoo-form-builder')}
                     />
+                    {required && (
+                        <TextControl
+                            label={__('Validation Message', 'ekwa-wufoo-form-builder')}
+                            value={validationMessage}
+                            onChange={(value) => setAttributes({ validationMessage: value })}
+                            help={__('Message to display when validation fails', 'ekwa-wufoo-form-builder')}
+                        />
+                    )}
                 </PanelBody>
             </InspectorControls>
             <div {...blockProps}>
@@ -52,10 +61,11 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         value={value}
                         checked={checked}
                         disabled
+                        style={{ marginRight: '8px' }}
                     />
-                    {label}
+                    {label} {required && <span style={{ color: 'red' }}>*</span>}
                 </label>
-                {validationMessage && (
+                {required && validationMessage && (
                     <span className="validation-message" style={{ color: '#d94f4f', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                         {validationMessage}
                     </span>

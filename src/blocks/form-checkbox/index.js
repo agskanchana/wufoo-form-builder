@@ -27,6 +27,10 @@ registerBlockType('ekwa-wufoo/form-checkbox', {
             type: 'boolean',
             default: false
         },
+        required: {
+            type: 'boolean',
+            default: false
+        },
         validationMessage: {
             type: 'string',
             default: ''

@@ -31,6 +31,10 @@ registerBlockType('ekwa-wufoo/form-radio', {
             type: 'string',
             default: ''
         },
+        required: {
+            type: 'boolean',
+            default: false
+        },
         validationMessage: {
             type: 'string',
             default: ''
