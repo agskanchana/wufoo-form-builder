@@ -1,0 +1,190 @@
+.ekwa-wufoo-form-builder {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ekwa-wufoo-form-builder form {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.form-input,
+.form-select,
+.form-textarea,
+.form-checkbox,
+.form-radio {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-input label,
+.form-select label,
+.form-textarea label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-input input,
+.form-select select,
+.form-textarea textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input input:focus,
+.form-select select:focus,
+.form-textarea textarea:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 0 1px #007cba;
+}
+
+/* Error states - More specific and important */
+.form-input.has-error input,
+.form-select.has-error select,
+.form-textarea.has-error textarea {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 1px #dc3545 !important;
+    background-color: #fff5f5;
+}
+
+.form-checkbox.has-error input[type="checkbox"],
+.form-radio.has-error input[type="radio"] {
+    outline: 2px solid #dc3545;
+    outline-offset: 1px;
+}
+
+.form-radio.has-error fieldset {
+    border-color: #dc3545 !important;
+    background-color: #fff5f5;
+}
+
+/* Validation message styles */
+.validation-message {
+    color: #dc3545 !important;
+    font-size: 12px !important;
+    margin-top: 4px !important;
+    display: none !important;
+    font-weight: normal !important;
+    line-height: 1.4;
+}
+
+.has-error .validation-message {
+    display: block !important;
+}
+
+/* Checkbox and Radio styles */
+.form-checkbox label,
+.form-radio label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+.form-checkbox input[type="checkbox"],
+.form-radio input[type="radio"] {
+    margin-right: 8px;
+    width: auto;
+    flex-shrink: 0;
+}
+
+.form-radio fieldset {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 0;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.form-radio legend {
+    font-weight: bold;
+    padding: 0 10px;
+    color: #333;
+}
+
+/* Submit button */
+.form-submit {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.submit-button {
+    background-color: #007cba;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #005a87;
+}
+
+.submit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Required field indicator */
+.form-input label span,
+.form-select label span,
+.form-textarea label span,
+.form-checkbox label span,
+.form-radio legend span {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Multiple form instances */
+.ekwa-wufoo-form-builder + .ekwa-wufoo-form-builder {
+    margin-top: 40px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .ekwa-wufoo-form-builder {
+        margin: 0 10px;
+    }
+
+    .ekwa-wufoo-form-builder form {
+        padding: 15px;
+    }
+}
+
+/* Animation for error states */
+.has-error .validation-message {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus states for error fields */
+.form-input.has-error input:focus,
+.form-select.has-error select:focus,
+.form-textarea.has-error textarea:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+}

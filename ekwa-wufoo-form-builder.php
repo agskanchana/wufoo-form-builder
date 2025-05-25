@@ -361,4 +361,26 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
         $field_id, $label, $required_indicator, $field_id, $field_id, $placeholder, $rows, $required, $validation_html
     );
 }
+
+// Enqueue frontend validation assets
+function ekwa_wufoo_form_builder_frontend_validation_assets() {
+    // Only enqueue on pages that have the form block
+    if (has_block('ekwa-wufoo/form-builder')) {
+        wp_enqueue_script(
+            'ekwa-form-validation',
+            plugins_url('assets/js/form-validation.js', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/js/form-validation.js'),
+            true
+        );
+
+        wp_enqueue_style(
+            'ekwa-form-styles',
+            plugins_url('assets/css/form-styles.css', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/css/form-styles.css')
+        );
+    }
+}
+add_action('wp_enqueue_scripts', 'ekwa_wufoo_form_builder_frontend_validation_assets');
 ?>
