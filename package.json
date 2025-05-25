@@ -1,0 +1,40 @@
+{
+  "name": "ekwa-wufoo-form-builder",
+  "version": "1.0.0",
+  "description": "A custom block for building forms using input and select elements.",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development",
+    "start": "webpack --mode development --watch"
+  },
+  "keywords": [
+    "wordpress",
+    "gutenberg",
+    "block",
+    "form",
+    "wufoo"
+  ],
+  "author": "Your Name",
+  "license": "GPL-2.0-or-later",
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "mini-css-extract-plugin": "^2.7.0",
+    "sass": "^1.63.0",
+    "sass-loader": "^13.3.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "dependencies": {
+    "@wordpress/block-editor": "^12.0.0",
+    "@wordpress/blocks": "^12.0.0",
+    "@wordpress/components": "^25.0.0",
+    "@wordpress/element": "^5.0.0",
+    "@wordpress/i18n": "^4.0.0"
+  }
+}

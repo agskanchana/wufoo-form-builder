@@ -1,0 +1,25 @@
+{
+  "apiVersion": "2.0",
+  "name": "ekwa-wufoo-form-builder",
+  "title": "Ekwa Wufoo Form Builder",
+  "category": "widgets",
+  "icon": "forms",
+  "description": "A block for creating custom forms with input and select fields.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "formId": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "textdomain": "ekwa-wufoo-form-builder",
+  "editorScript": "file:./src/index.js",
+  "editorStyle": "file:./src/editor.scss",
+  "style": "file:./src/style.scss",
+  "childBlocks": [
+    "ekwa-wufoo-form-builder/form-input",
+    "ekwa-wufoo-form-builder/form-select"
+  ]
+}

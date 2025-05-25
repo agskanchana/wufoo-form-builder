@@ -1,0 +1,30 @@
+/* Styles for the block editor interface of the ekwa-wufoo-form-builder block */
+
+.ekwa-wufoo-form-builder {
+    border: 2px dashed #ccc;
+    padding: 1rem;
+
+    .form-input,
+    .form-select {
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        background: #f9f9f9;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+    }
+}
