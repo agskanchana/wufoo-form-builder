@@ -29,3 +29,98 @@
         }
     }
 }
+
+// Add this to your editor.scss or style.scss
+.ekwa-icon-picker-modal {
+  .components-modal__content {
+    width: 80vw;
+    max-width: 800px;
+    height: 70vh;
+  }
+}
+
+.ekwa-icon-picker {
+  .ekwa-icon-collections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .ekwa-icon-search-input {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 20px;
+
+    .components-base-control {
+      flex: 1;
+    }
+  }
+
+  .ekwa-icon-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+  }
+
+  .ekwa-icon-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: #007cba;
+      background: #f0f8ff;
+    }
+
+    .ekwa-icon-svg-container {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 5px;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .ekwa-icon-name {
+      font-size: 10px;
+      text-align: center;
+      word-break: break-word;
+    }
+  }
+
+  .ekwa-dashicons-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .ekwa-dashicon {
+      padding: 8px;
+      border: 1px solid #ddd;
+
+      &.is-active {
+        border-color: #007cba;
+        background: #f0f8ff;
+      }
+    }
+  }
+
+  .ekwa-icon-loading {
+    text-align: center;
+    padding: 20px;
+  }
+}

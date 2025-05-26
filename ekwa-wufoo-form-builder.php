@@ -212,6 +212,9 @@ function ekwa_wufoo_form_input_render( $attributes ) {
     $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'input-' . uniqid();
     $required = $attributes['required'] ? 'required' : '';
     $validation_message = esc_html( $attributes['validationMessage'] );
+    $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
+    $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'left';
+    $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
 
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
@@ -223,26 +226,70 @@ function ekwa_wufoo_form_input_render( $attributes ) {
         );
     }
 
+    // Build icon HTML (only Iconify icons)
+    $icon_html = '';
+    if ( !empty( $icon_name ) && strpos( $icon_name, ':' ) !== false && !empty( $icon_svg_content ) ) {
+        $icon_html = sprintf(
+            '<span class="ekwa-icon-svg" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;">%s</span>',
+            $icon_svg_content
+        );
+    }
+
+    // Label with icon
+    $label_html = sprintf('<label for="%s">', $field_id);
+    if ( $icon_html && $icon_position === 'above' ) {
+        $label_html .= $icon_html . ' ';
+    }
+    $label_html .= $label . $required_indicator . '</label>';
+
+    // Input with icon positioning
+    $input_style = '';
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $padding_side = $icon_position === 'left' ? 'padding-left' : 'padding-right';
+        $input_style = sprintf('style="%s: 35px;"', $padding_side);
+    }
+
+    $input_wrapper_start = '';
+    $input_wrapper_end = '';
+    $icon_in_input = '';
+
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $input_wrapper_start = '<div style="position: relative; display: flex; align-items: center;">';
+        $input_wrapper_end = '</div>';
+        $icon_position_style = $icon_position === 'left' ? 'left: 10px;' : 'right: 10px;';
+        $icon_in_input = sprintf(
+            '<div style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            $icon_position_style,
+            $icon_html
+        );
+    }
+
     return sprintf(
-        '<div class="form-input"><label for="%s">%s%s</label><input type="%s" id="%s" name="%s" placeholder="%s" %s />%s</div>',
-        $field_id,
-        $label,
-        $required_indicator,
+        '<div class="form-input">%s%s%s<input type="%s" id="%s" name="%s" placeholder="%s" %s %s />%s%s</div>',
+        $label_html,
+        $input_wrapper_start,
+        $icon_in_input,
         $input_type,
         $field_id,
         $field_id,
         $placeholder,
         $required,
+        $input_style,
+        $input_wrapper_end,
         $validation_html
     );
 }
 
+// Updated Select Render Function
 function ekwa_wufoo_form_select_render( $attributes ) {
     $label = esc_html( $attributes['label'] );
     $options_string = $attributes['options'];
     $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'select-' . uniqid();
     $required = $attributes['required'] ? 'required' : '';
     $validation_message = esc_html( $attributes['validationMessage'] );
+    $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
+    $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'left';
+    $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
 
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
@@ -264,93 +311,60 @@ function ekwa_wufoo_form_select_render( $attributes ) {
         );
     }
 
+    // Build icon HTML (only Iconify icons)
+    $icon_html = '';
+    if ( !empty( $icon_name ) && strpos( $icon_name, ':' ) !== false && !empty( $icon_svg_content ) ) {
+        $icon_html = sprintf(
+            '<span class="ekwa-icon-svg" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;">%s</span>',
+            $icon_svg_content
+        );
+    }
+
+    // Label with icon
+    $label_html = sprintf('<label for="%s">', $field_id);
+    if ( $icon_html && $icon_position === 'above' ) {
+        $label_html .= $icon_html . ' ';
+    }
+    $label_html .= $label . $required_indicator . '</label>';
+
+    // Select with icon positioning
+    $select_style = '';
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $padding_side = $icon_position === 'left' ? 'padding-left' : 'padding-right';
+        $select_style = sprintf('style="%s: 35px;"', $padding_side);
+    }
+
+    $select_wrapper_start = '';
+    $select_wrapper_end = '';
+    $icon_in_select = '';
+
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $select_wrapper_start = '<div style="position: relative; display: flex; align-items: center;">';
+        $select_wrapper_end = '</div>';
+        $icon_position_style = $icon_position === 'left' ? 'left: 10px;' : 'right: 10px;';
+        $icon_in_select = sprintf(
+            '<div style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            $icon_position_style,
+            $icon_html
+        );
+    }
+
     return sprintf(
-        '<div class="form-select"><label for="%s">%s%s</label><select id="%s" name="%s" %s>%s</select>%s</div>',
-        $field_id,
-        $label,
-        $required_indicator,
+        '<div class="form-select">%s%s%s<select id="%s" name="%s" %s %s>%s</select>%s%s</div>',
+        $label_html,
+        $select_wrapper_start,
+        $icon_in_select,
         $field_id,
         $field_id,
         $required,
+        $select_style,
         $options_html,
+        $select_wrapper_end,
         $validation_html
     );
 }
 
-function ekwa_wufoo_form_checkbox_render( $attributes ) {
-    $label = esc_html( $attributes['label'] );
-    $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'checkbox-' . uniqid();
-    $value = esc_attr( $attributes['value'] );
-    $checked = $attributes['checked'] ? 'checked="checked"' : '';
-    $required = $attributes['required'] ? 'required' : '';
-    $validation_message = esc_html( $attributes['validationMessage'] );
-
-    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
-
-    $validation_html = '';
-    if ( $attributes['required'] && !empty( $validation_message ) ) {
-        $validation_html = sprintf(
-            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
-            $validation_message
-        );
-    }
-
-    return sprintf(
-        '<div class="form-checkbox"><label for="%s"><input type="checkbox" id="%s" name="%s" value="%s" %s %s /> %s%s</label>%s</div>',
-        $field_id, $field_id, $field_id, $value, $checked, $required, $label, $required_indicator, $validation_html
-    );
-}
-
-function ekwa_wufoo_form_radio_render( $attributes ) {
-    $label = esc_html( $attributes['label'] );
-    $field_name = !empty( $attributes['fieldName'] ) ? esc_attr( $attributes['fieldName'] ) : 'radio-' . uniqid();
-    $options_string = $attributes['options'];
-    $option_ids_string = $attributes['optionIds'];
-    $selected_value = esc_attr( $attributes['selectedValue'] );
-    $required = $attributes['required'] ? 'required' : '';
-    $validation_message = esc_html( $attributes['validationMessage'] );
-
-    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
-
-    $options_array = explode( ',', $options_string );
-    $ids_array = explode( ',', $option_ids_string );
-    $options_html = '';
-
-    foreach ( $options_array as $index => $option ) {
-        $option = trim( $option );
-        if ( !empty( $option ) ) {
-            $option_id = !empty( $ids_array[$index] ) ? trim( $ids_array[$index] ) : $field_name . '_' . $index;
-            $option_id = esc_attr( $option_id );
-            $checked = ($selected_value === $option) ? 'checked="checked"' : '';
-            $required_attr = ($index === 0) ? $required : ''; // Only add required to first radio button
-
-            $options_html .= sprintf(
-                '<label for="%s" style="display: block; margin-bottom: 8px;"><input id="%s" name="%s" type="radio" class="field radio" value="%s" %s %s tabindex="0" style="margin-right: 8px;" /> %s</label>',
-                $option_id,
-                $option_id,
-                $field_name,
-                esc_attr($option),
-                $checked,
-                $required_attr,
-                esc_html($option)
-            );
-        }
-    }
-
-    $validation_html = '';
-    if ( $attributes['required'] && !empty( $validation_message ) ) {
-        $validation_html = sprintf(
-            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
-            $validation_message
-        );
-    }
-
-    return sprintf(
-        '<div class="form-radio"><fieldset><legend>%s%s</legend>%s</fieldset>%s</div>',
-        $label, $required_indicator, $options_html, $validation_html
-    );
-}
-
+// Updated Textarea Render Function
 function ekwa_wufoo_form_textarea_render( $attributes ) {
     $label = esc_html( $attributes['label'] );
     $placeholder = esc_attr( $attributes['placeholder'] );
@@ -358,6 +372,9 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
     $rows = intval( $attributes['rows'] );
     $required = $attributes['required'] ? 'required' : '';
     $validation_message = esc_html( $attributes['validationMessage'] );
+    $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
+    $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'above';
+    $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
 
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
@@ -369,9 +386,57 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
         );
     }
 
+    // Build icon HTML (only Iconify icons)
+    $icon_html = '';
+    if ( !empty( $icon_name ) && strpos( $icon_name, ':' ) !== false && !empty( $icon_svg_content ) ) {
+        $icon_html = sprintf(
+            '<span class="ekwa-icon-svg" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;">%s</span>',
+            $icon_svg_content
+        );
+    }
+
+    // Label with icon
+    $label_html = sprintf('<label for="%s">', $field_id);
+    if ( $icon_html && $icon_position === 'above' ) {
+        $label_html .= $icon_html . ' ';
+    }
+    $label_html .= $label . $required_indicator . '</label>';
+
+    // Textarea with icon positioning
+    $textarea_style = '';
+    if ( $icon_html && ($icon_position === 'top-left' || $icon_position === 'top-right') ) {
+        $padding_side = $icon_position === 'top-left' ? 'padding-left' : 'padding-right';
+        $textarea_style = sprintf('style="padding-top: 35px; %s: 35px;"', $padding_side);
+    }
+
+    $textarea_wrapper_start = '';
+    $textarea_wrapper_end = '';
+    $icon_in_textarea = '';
+
+    if ( $icon_html && ($icon_position === 'top-left' || $icon_position === 'top-right') ) {
+        $textarea_wrapper_start = '<div style="position: relative; display: flex; align-items: flex-start;">';
+        $textarea_wrapper_end = '</div>';
+        $icon_position_style = $icon_position === 'top-left' ? 'top: 10px; left: 10px;' : 'top: 10px; right: 10px;';
+        $icon_in_textarea = sprintf(
+            '<div style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            $icon_position_style,
+            $icon_html
+        );
+    }
+
     return sprintf(
-        '<div class="form-textarea"><label for="%s">%s%s</label><textarea id="%s" name="%s" placeholder="%s" rows="%d" %s></textarea>%s</div>',
-        $field_id, $label, $required_indicator, $field_id, $field_id, $placeholder, $rows, $required, $validation_html
+        '<div class="form-textarea">%s%s%s<textarea id="%s" name="%s" placeholder="%s" rows="%d" %s %s></textarea>%s%s</div>',
+        $label_html,
+        $textarea_wrapper_start,
+        $icon_in_textarea,
+        $field_id,
+        $field_id,
+        $placeholder,
+        $rows,
+        $required,
+        $textarea_style,
+        $textarea_wrapper_end,
+        $validation_html
     );
 }
 

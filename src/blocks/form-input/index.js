@@ -34,6 +34,18 @@ registerBlockType('ekwa-wufoo/form-input', {
         validationMessage: {
             type: 'string',
             default: ''
+        },
+        iconName: {
+            type: 'string',
+            default: ''
+        },
+        iconPosition: {
+            type: 'string',
+            default: 'left'
+        },
+        iconSvgContent: {
+            type: 'string',
+            default: ''
         }
     },
     edit: Edit,
