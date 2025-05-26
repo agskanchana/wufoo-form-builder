@@ -2,15 +2,22 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        index: './src/index.js',
+        style: './src/style.scss',
+        editor: './src/editor.scss'
+    },
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'index.js',
+        filename: '[name].js',
         clean: true,
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: 'style.css'
+            filename: ({ chunk }) => {
+                // Create CSS files with the same name as the entry point
+                return chunk.name === 'index' ? 'index.css' : '[name].css';
+            }
         })
     ],
     module: {

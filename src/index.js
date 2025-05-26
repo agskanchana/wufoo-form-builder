@@ -11,10 +11,6 @@ import './blocks/form-checkbox';
 import './blocks/form-radio';
 import './blocks/form-textarea';
 
-// Import styles
-import './style.scss';
-import './editor.scss';
-
 // Register parent form builder block
 registerBlockType('ekwa-wufoo/form-builder', {
     apiVersion: 2,

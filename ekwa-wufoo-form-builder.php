@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Define the plugin path.
 define( 'EKWA_WUFOO_FORM_BUILDER_PATH', plugin_dir_path( __FILE__ ) );
 
-// Enqueue block editor assets.
+// Enqueue block editor assets (EDITOR ONLY)
 function ekwa_wufoo_form_builder_editor_assets() {
     $js_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/index.js';
     $editor_css_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/editor.css';
@@ -31,6 +31,7 @@ function ekwa_wufoo_form_builder_editor_assets() {
         );
     }
 
+    // EDITOR.CSS - Only loads in block editor
     if ( file_exists( $editor_css_file ) ) {
         wp_enqueue_style(
             'ekwa-wufoo-form-builder-editor',
@@ -42,35 +43,47 @@ function ekwa_wufoo_form_builder_editor_assets() {
 }
 add_action( 'enqueue_block_editor_assets', 'ekwa_wufoo_form_builder_editor_assets' );
 
-// Enqueue frontend assets.
-function ekwa_wufoo_form_builder_frontend_assets() {
-    $css_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/style.css';
+// Enqueue frontend and editor shared styles (BOTH frontend and editor)
+function ekwa_wufoo_form_builder_shared_assets() {
+    // Only enqueue on pages that have the form block OR in the editor
+    if ( has_block('ekwa-wufoo/form-builder') || is_admin() ) {
+        // STYLE.CSS - Shared frontend and editor styles
+        $css_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/style.css';
+        if ( file_exists( $css_file ) ) {
+            wp_enqueue_style(
+                'ekwa-wufoo-form-builder-style',
+                plugins_url( 'build/style.css', __FILE__ ),
+                array(),
+                filemtime( $css_file )
+            );
+        }
+    }
+}
+add_action( 'enqueue_block_assets', 'ekwa_wufoo_form_builder_shared_assets' );
 
-    if ( file_exists( $css_file ) ) {
-        wp_enqueue_style(
-            'ekwa-wufoo-form-builder-style',
-            plugins_url( 'build/style.css', __FILE__ ),
+// Enqueue frontend-only assets
+function ekwa_wufoo_form_builder_frontend_assets() {
+    // Only enqueue on frontend pages that have the form block (NOT in admin)
+    if ( !is_admin() && has_block('ekwa-wufoo/form-builder') ) {
+        // Form validation JavaScript
+        wp_enqueue_script(
+            'ekwa-form-validation',
+            plugins_url('assets/js/form-validation.js', __FILE__),
             array(),
-            filemtime( $css_file )
+            filemtime(plugin_dir_path(__FILE__) . 'assets/js/form-validation.js'),
+            true
+        );
+
+        // Form validation CSS
+        wp_enqueue_style(
+            'ekwa-form-styles',
+            plugins_url('assets/css/form-styles.css', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/css/form-styles.css')
         );
     }
 }
 add_action( 'wp_enqueue_scripts', 'ekwa_wufoo_form_builder_frontend_assets' );
-
-// Enqueue styles for both editor and frontend
-function ekwa_wufoo_form_builder_block_assets() {
-    $css_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/style.css';
-
-    if ( file_exists( $css_file ) ) {
-        wp_enqueue_style(
-            'ekwa-wufoo-form-builder-style',
-            plugins_url( 'build/style.css', __FILE__ ),
-            array(),
-            filemtime( $css_file )
-        );
-    }
-}
-add_action( 'enqueue_block_assets', 'ekwa_wufoo_form_builder_block_assets' );
 
 // Register blocks with PHP render callbacks
 function ekwa_wufoo_form_builder_register_blocks() {
@@ -362,25 +375,4 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
     );
 }
 
-// Enqueue frontend validation assets
-function ekwa_wufoo_form_builder_frontend_validation_assets() {
-    // Only enqueue on pages that have the form block
-    if (has_block('ekwa-wufoo/form-builder')) {
-        wp_enqueue_script(
-            'ekwa-form-validation',
-            plugins_url('assets/js/form-validation.js', __FILE__),
-            array(),
-            filemtime(plugin_dir_path(__FILE__) . 'assets/js/form-validation.js'),
-            true
-        );
-
-        wp_enqueue_style(
-            'ekwa-form-styles',
-            plugins_url('assets/css/form-styles.css', __FILE__),
-            array(),
-            filemtime(plugin_dir_path(__FILE__) . 'assets/css/form-styles.css')
-        );
-    }
-}
-add_action('wp_enqueue_scripts', 'ekwa_wufoo_form_builder_frontend_validation_assets');
 ?>
