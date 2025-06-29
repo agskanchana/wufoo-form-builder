@@ -74,6 +74,15 @@ function ekwa_wufoo_form_builder_frontend_assets() {
             true
         );
 
+        // Phone masking JavaScript
+        wp_enqueue_script(
+            'ekwa-phone-mask',
+            plugins_url('assets/js/phone-mask.js', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/js/phone-mask.js'),
+            true
+        );
+
         // Form validation CSS
         wp_enqueue_style(
             'ekwa-form-styles',
@@ -119,7 +128,12 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'inputType' => array('type' => 'string', 'default' => 'text'),
             'fieldId' => array('type' => 'string', 'default' => ''),
             'required' => array('type' => 'boolean', 'default' => false),
-            'validationMessage' => array('type' => 'string', 'default' => '')
+            'validationMessage' => array('type' => 'string', 'default' => ''),
+            'iconName' => array('type' => 'string', 'default' => ''),
+            'iconPosition' => array('type' => 'string', 'default' => 'left'),
+            'iconSvgContent' => array('type' => 'string', 'default' => ''),
+            'enablePhoneMask' => array('type' => 'boolean', 'default' => true),
+            'phoneFormat' => array('type' => 'string', 'default' => '###-###-####')
         )
     ) );
 
@@ -174,6 +188,22 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'validationMessage' => array('type' => 'string', 'default' => '')
         )
     ) );
+
+    // Register checkbox group block
+    register_block_type( 'ekwa-wufoo/form-checkbox-group', array(
+        'render_callback' => 'ekwa_wufoo_form_checkbox_group_render',
+        'attributes' => array(
+            'label' => array('type' => 'string', 'default' => 'Checkbox Group Label'),
+            'fieldName' => array('type' => 'string', 'default' => ''),
+            'options' => array('type' => 'string', 'default' => 'Option 1,Option 2,Option 3'),
+            'optionIds' => array('type' => 'string', 'default' => ''),
+            'selectedValues' => array('type' => 'array', 'default' => array()),
+            'required' => array('type' => 'boolean', 'default' => false),
+            'validationMessage' => array('type' => 'string', 'default' => ''),
+            'minSelections' => array('type' => 'number', 'default' => 1),
+            'maxSelections' => array('type' => 'number', 'default' => 0)
+        )
+    ) );
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
@@ -215,6 +245,8 @@ function ekwa_wufoo_form_input_render( $attributes ) {
     $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
     $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'left';
     $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
+    $enable_phone_mask = isset( $attributes['enablePhoneMask'] ) ? $attributes['enablePhoneMask'] : true;
+    $phone_format = !empty( $attributes['phoneFormat'] ) ? $attributes['phoneFormat'] : '###-###-####';
 
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
@@ -242,6 +274,21 @@ function ekwa_wufoo_form_input_render( $attributes ) {
     }
     $label_html .= $label . $required_indicator . '</label>';
 
+    // Handle phone masking attributes
+    $mask_attributes = '';
+    $input_class = 'ekwa-form-input';
+    if ( $input_type === 'tel' && $enable_phone_mask ) {
+        $mask_attributes = sprintf(' data-mask="%s" data-mask-placeholder="%s"',
+            esc_attr( $phone_format ),
+            esc_attr( str_replace( '#', '_', $phone_format ) )
+        );
+        $input_class .= ' ekwa-phone-mask';
+        // Update placeholder for phone fields
+        if ( empty( $placeholder ) || $placeholder === 'Enter text...' ) {
+            $placeholder = str_replace( '#', '_', $phone_format );
+        }
+    }
+
     // Input with icon positioning
     $input_style = '';
     if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
@@ -265,16 +312,18 @@ function ekwa_wufoo_form_input_render( $attributes ) {
     }
 
     return sprintf(
-        '<div class="form-input">%s%s%s<input type="%s" id="%s" name="%s" placeholder="%s" %s %s />%s%s</div>',
+        '<div class="form-input">%s%s%s<input type="%s" id="%s" name="%s" class="%s" placeholder="%s" %s %s%s />%s%s</div>',
         $label_html,
         $input_wrapper_start,
         $icon_in_input,
         $input_type,
         $field_id,
         $field_id,
+        $input_class,
         $placeholder,
         $required,
         $input_style,
+        $mask_attributes,
         $input_wrapper_end,
         $validation_html
     );
@@ -436,6 +485,216 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
         $required,
         $textarea_style,
         $textarea_wrapper_end,
+        $validation_html
+    );
+}
+
+// Add this function after your other render functions
+function ekwa_wufoo_form_radio_render( $attributes ) {
+    $label = esc_html( $attributes['label'] );
+    $field_name = !empty( $attributes['fieldName'] ) ? esc_attr( $attributes['fieldName'] ) : 'radio-group-' . uniqid();
+    $options_string = $attributes['options'];
+    $option_ids_string = !empty( $attributes['optionIds'] ) ? $attributes['optionIds'] : '';
+    $selected_value = $attributes['selectedValue'];
+    $required = $attributes['required'] ? 'required' : '';
+    $validation_message = esc_html( $attributes['validationMessage'] );
+
+    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
+
+    // Parse options and IDs
+    $options_array = explode( ',', $options_string );
+    $ids_array = explode( ',', $option_ids_string );
+
+    // Clean up arrays
+    $options_array = array_map( 'trim', $options_array );
+    $options_array = array_filter( $options_array );
+
+    $ids_array = array_map( 'trim', $ids_array );
+
+    // Ensure IDs array has same length as options array
+    while ( count( $ids_array ) < count( $options_array ) ) {
+        $ids_array[] = '';
+    }
+
+    $validation_html = '';
+    if ( $attributes['required'] && !empty( $validation_message ) ) {
+        $validation_html = sprintf(
+            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
+            $validation_message
+        );
+    }
+
+    // Build radio buttons HTML
+    $radio_buttons_html = '';
+    foreach ( $options_array as $index => $option ) {
+        if ( empty( $option ) ) continue;
+
+        $radio_id = !empty( $ids_array[$index] ) ? esc_attr( $ids_array[$index] ) : 'radio_' . $index . '_' . uniqid();
+        $is_checked = ( $selected_value === $option ) ? 'checked' : '';
+
+        $radio_buttons_html .= sprintf(
+            '<label for="%s" style="display: block; margin-bottom: 8px; cursor: pointer;">
+                <input type="radio" id="%s" name="%s" value="%s" %s %s style="margin-right: 8px;" />
+                %s
+            </label>',
+            $radio_id,
+            $radio_id,
+            $field_name,
+            esc_attr( $option ),
+            $is_checked,
+            $required,
+            esc_html( $option )
+        );
+    }
+
+    return sprintf(
+        '<div class="form-radio">
+            <fieldset style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin: 0;">
+                <legend style="font-weight: bold; padding: 0 10px;">%s%s</legend>
+                %s
+            </fieldset>
+            %s
+        </div>',
+        $label,
+        $required_indicator,
+        $radio_buttons_html,
+        $validation_html
+    );
+}
+
+// Add this function to your ekwa-wufoo-form-builder.php file after the radio render function
+
+function ekwa_wufoo_form_checkbox_render( $attributes ) {
+    $label = esc_html( $attributes['label'] );
+    $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'checkbox-' . uniqid();
+    $value = esc_attr( $attributes['value'] );
+    $checked = $attributes['checked'] ? 'checked="checked"' : '';
+    $required = $attributes['required'] ? 'required' : '';
+    $validation_message = esc_html( $attributes['validationMessage'] );
+
+    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
+
+    $validation_html = '';
+    if ( $attributes['required'] && !empty( $validation_message ) ) {
+        $validation_html = sprintf(
+            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
+            $validation_message
+        );
+    }
+
+    return sprintf(
+        '<div class="form-checkbox">
+            <label for="%s" style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="%s" name="%s" value="%s" %s %s style="margin-right: 8px;" />
+                %s%s
+            </label>
+            %s
+        </div>',
+        $field_id,
+        $field_id,
+        $field_id,
+        $value,
+        $checked,
+        $required,
+        $label,
+        $required_indicator,
+        $validation_html
+    );
+}
+
+// Add this function to your ekwa-wufoo-form-builder.php file after the checkbox render function
+function ekwa_wufoo_form_checkbox_group_render( $attributes ) {
+    $label = esc_html( $attributes['label'] );
+    $field_name = !empty( $attributes['fieldName'] ) ? esc_attr( $attributes['fieldName'] ) : 'checkbox-group-' . uniqid();
+    $options_string = $attributes['options'];
+    $option_ids_string = !empty( $attributes['optionIds'] ) ? $attributes['optionIds'] : '';
+    $selected_values = !empty( $attributes['selectedValues'] ) ? $attributes['selectedValues'] : array();
+    $required = $attributes['required'] ? 'required' : '';
+    $validation_message = esc_html( $attributes['validationMessage'] );
+    $min_selections = intval( $attributes['minSelections'] );
+    $max_selections = intval( $attributes['maxSelections'] );
+
+    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
+
+    // Parse options - split by comma and clean
+    $options_array = array_map('trim', explode(',', $options_string));
+    $options_array = array_filter($options_array);
+
+    // Parse IDs - split by comma and clean, handle line breaks
+    $ids_string_cleaned = str_replace(array("\r\n", "\r", "\n"), ',', $option_ids_string);
+    $ids_array = array_map('trim', explode(',', $ids_string_cleaned));
+    $ids_array = array_filter($ids_array, function($id) {
+        return $id !== '';
+    });
+
+    // Reset array keys
+    $options_array = array_values($options_array);
+    $ids_array = array_values($ids_array);
+
+    $validation_html = '';
+    if ( $attributes['required'] && !empty( $validation_message ) ) {
+        $validation_html = sprintf(
+            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;" data-min-selections="%d" data-max-selections="%d">%s</span>',
+            $min_selections,
+            $max_selections,
+            $validation_message
+        );
+    }
+
+    // Build checkbox buttons HTML with individual IDs and names
+    $checkbox_buttons_html = '';
+    foreach ( $options_array as $index => $option ) {
+        if ( empty( $option ) ) continue;
+
+        // Generate field ID - use custom ID if provided, otherwise use Field1, Field2, etc.
+        $field_id = !empty( $ids_array[$index] ) ? esc_attr( $ids_array[$index] ) : 'Field' . ( $index + 1 );
+        $is_checked = in_array( $option, $selected_values ) ? 'checked' : '';
+
+        $checkbox_buttons_html .= sprintf(
+            '<label for="%s" style="display: block; margin-bottom: 8px; cursor: pointer;">
+                <input type="checkbox" id="%s" name="%s" value="%s" %s %s style="margin-right: 8px;" data-group="%s" />
+                %s
+            </label>',
+            $field_id,
+            $field_id,
+            $field_id, // Each checkbox has its own name
+            esc_attr( $option ),
+            $is_checked,
+            $required,
+            $field_name, // Keep data-group for validation
+            esc_html( $option )
+        );
+    }
+
+    // Determine if we have a label to show the border
+    $has_label = !empty( trim( $label ) );
+
+    // Choose fieldset style based on whether we have a label
+    if ( $has_label ) {
+        // With label - show border and legend
+        $fieldset_style = 'border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin: 0;';
+        $legend_html = sprintf(
+            '<legend style="font-weight: bold; padding: 0 10px;">%s%s</legend>',
+            $label,
+            $required_indicator
+        );
+    } else {
+        // Without label - no border, just padding
+        $fieldset_style = 'border: none; padding: 15px; margin: 0;';
+        $legend_html = '';
+    }
+
+    $content_wrapper = sprintf(
+        '<fieldset style="%s">%s%s</fieldset>',
+        $fieldset_style,
+        $legend_html,
+        $checkbox_buttons_html
+    );
+
+    return sprintf(
+        '<div class="form-checkbox-group" data-field-name="%s">%s%s</div>',
+        $field_name,
+        $content_wrapper,
         $validation_html
     );
 }

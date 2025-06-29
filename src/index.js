@@ -60,7 +60,8 @@ registerBlockType('ekwa-wufoo/form-builder', {
             'ekwa-wufoo/form-select',
             'ekwa-wufoo/form-checkbox',
             'ekwa-wufoo/form-radio',
-            'ekwa-wufoo/form-textarea'
+            'ekwa-wufoo/form-textarea',
+            'ekwa-wufoo/form-checkbox-group'
         ];
 
         // Template with a basic layout example

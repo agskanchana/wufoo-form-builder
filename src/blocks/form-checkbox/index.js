@@ -1,10 +1,10 @@
 import { registerBlockType } from '@wordpress/blocks';
 import Edit from './edit';
 
-registerBlockType('ekwa-wufoo/form-checkbox', {
+registerBlockType('ekwa-wufoo/form-checkbox-group', {
     apiVersion: 2,
-    title: 'Form Checkbox',
-    icon: 'yes',
+    title: 'Form Checkbox Group',
+    icon: 'yes-alt',
     category: 'widgets',
     parent: ['ekwa-wufoo/form-builder', 'core/group', 'core/column'],
     supports: {
@@ -13,19 +13,23 @@ registerBlockType('ekwa-wufoo/form-checkbox', {
     attributes: {
         label: {
             type: 'string',
-            default: 'Checkbox Label',
+            default: 'Checkbox Group Label',
         },
-        fieldId: {
+        fieldName: {
             type: 'string',
             default: ''
         },
-        value: {
+        options: {
             type: 'string',
-            default: 'checkbox_value'
+            default: 'Option 1,Option 2,Option 3'
         },
-        checked: {
-            type: 'boolean',
-            default: false
+        optionIds: {
+            type: 'string',
+            default: ''
+        },
+        selectedValues: {
+            type: 'array',
+            default: []
         },
         required: {
             type: 'boolean',
@@ -34,6 +38,14 @@ registerBlockType('ekwa-wufoo/form-checkbox', {
         validationMessage: {
             type: 'string',
             default: ''
+        },
+        minSelections: {
+            type: 'number',
+            default: 1
+        },
+        maxSelections: {
+            type: 'number',
+            default: 0 // 0 = unlimited
         }
     },
     edit: Edit,

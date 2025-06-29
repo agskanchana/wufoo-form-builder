@@ -75,12 +75,14 @@
         // Handle form submission
         form.addEventListener('submit', handleFormSubmit);
 
-        // Add real-time validation on field blur
+        // Add real-time validation on field blur/change
         const formFields = form.querySelectorAll('input, select, textarea');
         formFields.forEach(function(field) {
             field.addEventListener('blur', function(e) {
                 e.stopPropagation();
-                validateSingleField(field, form);
+                if (field.type !== 'checkbox' || !field.hasAttribute('data-group')) {
+                    validateSingleField(field, form);
+                }
             });
 
             field.addEventListener('input', function(e) {
@@ -90,7 +92,23 @@
 
             field.addEventListener('change', function(e) {
                 e.stopPropagation();
-                clearFieldError(field, form);
+                // Clear errors for checkbox groups when any checkbox changes
+                if (field.type === 'checkbox' && field.hasAttribute('data-group')) {
+                    const groupContainer = field.closest('.form-checkbox-group');
+                    if (groupContainer) {
+                        groupContainer.classList.remove('has-error');
+                        const validationMessage = groupContainer.querySelector('.validation-message');
+                        if (validationMessage) {
+                            validationMessage.style.display = 'none';
+                        }
+                        const groupCheckboxes = groupContainer.querySelectorAll('input[type="checkbox"]');
+                        groupCheckboxes.forEach(function(checkbox) {
+                            checkbox.classList.remove('error');
+                        });
+                    }
+                } else {
+                    clearFieldError(field, form);
+                }
             });
         });
     }
@@ -115,9 +133,9 @@
             return true;
         }
 
-        // Validate all individual required fields
+        // Validate all individual required fields (excluding checkboxes with data-group)
         requiredFields.forEach(function(field) {
-            if (field.type !== 'radio') { // Handle radio separately
+            if (field.type !== 'radio' && !(field.type === 'checkbox' && field.hasAttribute('data-group'))) {
                 if (!validateSingleField(field, form)) {
                     isValid = false;
                 }
@@ -139,6 +157,38 @@
             }
         });
 
+        // Validate checkbox groups separately
+        const checkboxGroups = getCheckboxGroups(form);
+        checkboxGroups.forEach(function(groupName) {
+            const groupContainer = form.querySelector(`[data-field-name="${groupName}"]`);
+            const checkboxes = groupContainer ? groupContainer.querySelectorAll(`input[type="checkbox"][data-group="${groupName}"]`) : [];
+            const firstCheckbox = checkboxes[0];
+
+            if (firstCheckbox && firstCheckbox.hasAttribute('required')) {
+                const validationMessage = groupContainer ? groupContainer.querySelector('.validation-message') : null;
+
+                const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+                const minSelections = validationMessage ? parseInt(validationMessage.getAttribute('data-min-selections')) || 1 : 1;
+                const maxSelections = validationMessage ? parseInt(validationMessage.getAttribute('data-max-selections')) || 0 : 0;
+
+                let groupIsValid = true;
+                let errorMessage = 'Please select at least one option.';
+
+                if (checkedCount < minSelections) {
+                    groupIsValid = false;
+                    errorMessage = `Please select at least ${minSelections} option${minSelections > 1 ? 's' : ''}.`;
+                } else if (maxSelections > 0 && checkedCount > maxSelections) {
+                    groupIsValid = false;
+                    errorMessage = `Please select no more than ${maxSelections} option${maxSelections > 1 ? 's' : ''}.`;
+                }
+
+                if (!groupIsValid) {
+                    showCheckboxGroupError(groupContainer, errorMessage, form);
+                    isValid = false;
+                }
+            }
+        });
+
         if (!isValid) {
             // Scroll to first error within this form
             const firstError = form.querySelector('.has-error');
@@ -149,6 +199,8 @@
 
         return isValid;
     }
+
+        // Replace the validateSingleField function with this corrected version:
 
     function validateSingleField(field, form) {
         if (!field || !field.hasAttribute('required')) {
@@ -174,6 +226,21 @@
             if (!field.value || field.value === '') {
                 isValid = false;
                 errorMessage = getValidationMessage(field, 'Please select an option.');
+            }
+        } else if (field.type === 'tel') {
+            // Special validation for phone numbers
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = getValidationMessage(field, 'This field is required.');
+            } else {
+                // Check if it's a masked phone field
+                if (field.classList.contains('ekwa-phone-mask')) {
+                    const numbers = field.value.replace(/\D/g, '');
+                    if (numbers.length !== 10) {
+                        isValid = false;
+                        errorMessage = getValidationMessage(field, 'Please enter a valid 10-digit phone number.');
+                    }
+                }
             }
         } else {
             // Text inputs, textareas, etc.
@@ -228,6 +295,35 @@
         }
     }
 
+    function showCheckboxGroupError(groupContainer, message, form) {
+        if (groupContainer && form.contains(groupContainer)) {
+            groupContainer.classList.add('has-error');
+
+            let validationMessage = groupContainer.querySelector('.validation-message');
+            if (validationMessage) {
+                // Update existing validation message
+                validationMessage.textContent = message;
+                validationMessage.style.display = 'block';
+                validationMessage.style.color = '#d94f4f';
+                validationMessage.style.fontSize = '12px';
+                validationMessage.style.marginTop = '4px';
+            } else {
+                // Create validation message if it doesn't exist
+                validationMessage = document.createElement('span');
+                validationMessage.className = 'validation-message';
+                validationMessage.textContent = message;
+                validationMessage.style.cssText = 'color: #d94f4f; font-size: 12px; margin-top: 4px; display: block;';
+                groupContainer.appendChild(validationMessage);
+            }
+
+            // Add error class to all checkboxes in the group
+            const checkboxes = groupContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.classList.add('error');
+            });
+        }
+    }
+
     function clearFieldError(field, form) {
         const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio');
 
@@ -270,6 +366,22 @@
         radioButtons.forEach(function(radio) {
             if (radio.name) {
                 groups.add(radio.name);
+            }
+        });
+
+        return Array.from(groups);
+    }
+
+    function getCheckboxGroups(form) {
+        if (!form) return [];
+
+        const checkboxGroups = form.querySelectorAll('.form-checkbox-group[data-field-name]');
+        const groups = new Set();
+
+        checkboxGroups.forEach(function(group) {
+            const fieldName = group.getAttribute('data-field-name');
+            if (fieldName) {
+                groups.add(fieldName);
             }
         });
 

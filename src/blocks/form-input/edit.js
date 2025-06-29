@@ -19,11 +19,20 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
         validationMessage,
         iconName,
         iconPosition,
-        iconSvgContent
+        iconSvgContent,
+        enablePhoneMask,
+        phoneFormat
     } = attributes;
 
     const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
     const [iconPreview, setIconPreview] = useState('');
+
+    // Auto-enable phone mask when input type is tel
+    useEffect(() => {
+        if (inputType === 'tel' && !enablePhoneMask) {
+            setAttributes({ enablePhoneMask: true });
+        }
+    }, [inputType]);
 
     // Load icon preview when iconName changes
     useEffect(() => {
@@ -118,11 +127,37 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                             { label: 'Email', value: 'email' },
                             { label: 'Password', value: 'password' },
                             { label: 'Number', value: 'number' },
-                            { label: 'Tel', value: 'tel' },
+                            { label: 'Phone (Tel)', value: 'tel' },
                             { label: 'URL', value: 'url' },
                         ]}
                         onChange={(value) => setAttributes({ inputType: value })}
                     />
+
+                    {inputType === 'tel' && (
+                        <>
+                            <ToggleControl
+                                label={__('Enable Phone Masking', 'ekwa-wufoo-form-builder')}
+                                checked={enablePhoneMask}
+                                onChange={(value) => setAttributes({ enablePhoneMask: value })}
+                                help={__('Automatically format phone numbers as user types', 'ekwa-wufoo-form-builder')}
+                            />
+                            {enablePhoneMask && (
+                                <SelectControl
+                                    label={__('Phone Format', 'ekwa-wufoo-form-builder')}
+                                    value={phoneFormat}
+                                    options={[
+                                        { label: '111-111-1111', value: '###-###-####' },
+                                        { label: '(111) 111-1111', value: '(###) ###-####' },
+                                        { label: '111.111.1111', value: '###.###.####' },
+                                        { label: '111 111 1111', value: '### ### ####' },
+                                    ]}
+                                    onChange={(value) => setAttributes({ phoneFormat: value })}
+                                    help={__('Choose how phone numbers should be formatted', 'ekwa-wufoo-form-builder')}
+                                />
+                            )}
+                        </>
+                    )}
+
                     <ToggleControl
                         label={__('Required Field', 'ekwa-wufoo-form-builder')}
                         checked={required}
@@ -207,7 +242,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         type={inputType}
                         id={fieldId}
                         name={fieldId}
-                        placeholder={placeholder}
+                        placeholder={inputType === 'tel' && enablePhoneMask ? phoneFormat.replace(/#/g, '_') : placeholder}
                         disabled
                         style={{
                             width: '100%',
@@ -219,6 +254,11 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         }}
                     />
                 </div>
+                {inputType === 'tel' && enablePhoneMask && (
+                    <small style={{ color: '#666', fontSize: '11px', marginTop: '2px', display: 'block' }}>
+                        Format: {phoneFormat}
+                    </small>
+                )}
                 {required && validationMessage && (
                     <span className="validation-message" style={{ color: '#d94f4f', fontSize: '12px', marginTop: '4px', display: 'block' }}>
                         {validationMessage}

@@ -46,6 +46,14 @@ registerBlockType('ekwa-wufoo/form-input', {
         iconSvgContent: {
             type: 'string',
             default: ''
+        },
+        enablePhoneMask: {
+            type: 'boolean',
+            default: true
+        },
+        phoneFormat: {
+            type: 'string',
+            default: '###-###-####'
         }
     },
     edit: Edit,
