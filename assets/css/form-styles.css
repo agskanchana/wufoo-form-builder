@@ -51,7 +51,8 @@
 /* Error states - More specific and important */
 .form-input.has-error input,
 .form-select.has-error select,
-.form-textarea.has-error textarea {
+.form-textarea.has-error textarea,
+.ekwa-datepicker.error {
     border-color: #dc3545 !important;
     box-shadow: 0 0 0 1px #dc3545 !important;
     background-color: #fff5f5;
@@ -63,7 +64,8 @@
     outline-offset: 1px;
 }
 
-.form-radio.has-error fieldset {
+.form-radio.has-error fieldset,
+.form-checkbox-group.has-error fieldset {
     border-color: #dc3545 !important;
     background-color: #fff5f5;
 }
@@ -107,10 +109,10 @@
     transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
-.form-radio legend {
-    font-weight: bold;
+.ekwa-wufoo-form-builder legend {
     padding: 0 10px;
     color: #333;
+    font-weight: normal !important;
 }
 
 /* Submit button */
@@ -184,7 +186,12 @@
 /* Focus states for error fields */
 .form-input.has-error input:focus,
 .form-select.has-error select:focus,
-.form-textarea.has-error textarea:focus {
+.form-textarea.has-error textarea:focus,
+.ekwa-datepicker.error:focus
+ {
     border-color: #dc3545 !important;
     box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2) !important;
+}
+.ekwa-wufoo-form-builder label {
+    font-weight:  normal !important;
 }

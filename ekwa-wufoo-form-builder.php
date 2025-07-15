@@ -123,7 +123,7 @@ function ekwa_wufoo_form_builder_register_blocks() {
             ),
             'ekwaUrl' => array(
                 'type' => 'string',
-                'default' => 'https://www.ekwa.com/ekwa-wufoo-handler/en.php'
+                'default' => 'https://www.ekwa.com/ekwa-wufoo-handler/en-no-recaptcha.php'
             ),
             'idStamp' => array(
                 'type' => 'string',
@@ -606,7 +606,7 @@ function ekwa_wufoo_form_radio_render( $attributes ) {
     return sprintf(
         '<div class="form-radio">
             <fieldset style="border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin: 0;">
-                <legend style="font-weight: bold; padding: 0 10px;">%s%s</legend>
+                <legend style="padding: 0 10px;">%s%s</legend>
                 %s
             </fieldset>
             %s
@@ -730,7 +730,7 @@ function ekwa_wufoo_form_checkbox_group_render( $attributes ) {
         // With label - show border and legend
         $fieldset_style = 'border: 1px solid #ccc; border-radius: 4px; padding: 15px; margin: 0;';
         $legend_html = sprintf(
-            '<legend style="font-weight: bold; padding: 0 10px;">%s%s</legend>',
+            '<legend style="padding: 0 10px;">%s%s</legend>',
             $label,
             $required_indicator
         );
