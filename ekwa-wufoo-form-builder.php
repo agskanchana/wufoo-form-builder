@@ -83,7 +83,16 @@ function ekwa_wufoo_form_builder_frontend_assets() {
             true
         );
 
-        // Form validation CSS
+        // Datepicker JavaScript
+        wp_enqueue_script(
+            'ekwa-datepicker',
+            plugins_url('assets/js/datepicker.js', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/js/datepicker.js'),
+            true
+        );
+
+        // Form styles
         wp_enqueue_style(
             'ekwa-form-styles',
             plugins_url('assets/css/form-styles.css', __FILE__),
@@ -111,6 +120,10 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'actionUrl' => array(
                 'type' => 'string',
                 'default' => ''
+            ),
+            'ekwaUrl' => array(
+                'type' => 'string',
+                'default' => 'https://www.ekwa.com/ekwa-wufoo-handler/en.php'
             ),
             'idStamp' => array(
                 'type' => 'string',
@@ -204,6 +217,27 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'maxSelections' => array('type' => 'number', 'default' => 0)
         )
     ) );
+
+    // Register datepicker block
+    register_block_type( 'ekwa-wufoo/form-datepicker', array(
+        'render_callback' => 'ekwa_wufoo_form_datepicker_render',
+        'attributes' => array(
+            'label' => array('type' => 'string', 'default' => 'Select Date'),
+            'fieldId' => array('type' => 'string', 'default' => ''),
+            'required' => array('type' => 'boolean', 'default' => false),
+            'validationMessage' => array('type' => 'string', 'default' => ''),
+            'disablePastDates' => array('type' => 'boolean', 'default' => true),
+            'disableFutureDates' => array('type' => 'boolean', 'default' => false),
+            'disableWeekends' => array('type' => 'boolean', 'default' => false),
+            'minDate' => array('type' => 'string', 'default' => ''),
+            'maxDate' => array('type' => 'string', 'default' => ''),
+            'defaultValue' => array('type' => 'string', 'default' => ''),
+            'placeholder' => array('type' => 'string', 'default' => 'Select a date'),
+            'iconName' => array('type' => 'string', 'default' => ''),
+            'iconPosition' => array('type' => 'string', 'default' => 'left'),
+            'iconSvgContent' => array('type' => 'string', 'default' => '')
+        )
+    ) );
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
@@ -211,7 +245,7 @@ add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $form_id = !empty( $attributes['formId'] ) ? esc_attr( $attributes['formId'] ) : 'ekwa-form-' . uniqid();
     $submit_text = !empty( $attributes['submitText'] ) ? esc_html( $attributes['submitText'] ) : 'Submit';
-    $action_url = !empty( $attributes['actionUrl'] ) ? esc_url( $attributes['actionUrl'] ) : '';
+    $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : 'https://www.ekwa.com/ekwa-wufoo-handler/en.php';
     $id_stamp = !empty( $attributes['idStamp'] ) ? esc_attr( $attributes['idStamp'] ) : '';
 
     // Build ID stamp HTML as hidden input if provided
@@ -695,6 +729,123 @@ function ekwa_wufoo_form_checkbox_group_render( $attributes ) {
         '<div class="form-checkbox-group" data-field-name="%s">%s%s</div>',
         $field_name,
         $content_wrapper,
+        $validation_html
+    );
+}
+
+// Render callback for datepicker block
+function ekwa_wufoo_form_datepicker_render( $attributes ) {
+    $label = esc_html( $attributes['label'] );
+    $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'datepicker-' . uniqid();
+    $required = $attributes['required'] ? 'required' : '';
+    $validation_message = esc_html( $attributes['validationMessage'] );
+    $disable_past_dates = $attributes['disablePastDates'];
+    $disable_future_dates = $attributes['disableFutureDates'];
+    $disable_weekends = $attributes['disableWeekends'];
+    $min_date = !empty( $attributes['minDate'] ) ? esc_attr( $attributes['minDate'] ) : '';
+    $max_date = !empty( $attributes['maxDate'] ) ? esc_attr( $attributes['maxDate'] ) : '';
+    $default_value = !empty( $attributes['defaultValue'] ) ? esc_attr( $attributes['defaultValue'] ) : '';
+    $placeholder = esc_attr( $attributes['placeholder'] );
+    $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
+    $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'left';
+    $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
+
+    $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
+
+    // Set min date if past dates are disabled
+    if ( $disable_past_dates && empty( $min_date ) ) {
+        $min_date = date('Y-m-d');
+    }
+
+    // Set max date if future dates are disabled
+    if ( $disable_future_dates && empty( $max_date ) ) {
+        $max_date = date('Y-m-d');
+    }
+
+    $validation_html = '';
+    if ( $attributes['required'] && !empty( $validation_message ) ) {
+        $validation_html = sprintf(
+            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
+            $validation_message
+        );
+    }
+
+    // Build data attributes for JavaScript functionality
+    $data_attributes = '';
+    if ( $disable_weekends ) {
+        $data_attributes .= ' data-disable-weekends="true"';
+    }
+    if ( $disable_past_dates ) {
+        $data_attributes .= ' data-disable-past="true"';
+    }
+    if ( $disable_future_dates ) {
+        $data_attributes .= ' data-disable-future="true"';
+    }
+
+    // Build icon HTML (only Iconify icons)
+    $icon_html = '';
+    if ( !empty( $icon_name ) && strpos( $icon_name, ':' ) !== false && !empty( $icon_svg_content ) ) {
+        $icon_html = sprintf(
+            '<span class="ekwa-icon-svg" style="width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;">%s</span>',
+            $icon_svg_content
+        );
+    }
+
+    // Label with icon
+    $label_html = sprintf('<label for="%s" style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">', $field_id);
+    if ( $icon_html && $icon_position === 'above' ) {
+        $label_html .= $icon_html . ' ';
+    }
+    $label_html .= '<span>' . $label . $required_indicator . '</span></label>';
+
+    // Input with icon positioning
+    $input_style = 'width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;';
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $padding_side = $icon_position === 'left' ? 'padding-left' : 'padding-right';
+        $input_style = 'width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; ' . $padding_side . ': 35px;';
+    }
+
+    $input_wrapper_start = '';
+    $input_wrapper_end = '';
+    $icon_in_input = '';
+
+    if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
+        $input_wrapper_start = '<div style="position: relative; display: flex; align-items: center;">';
+        $input_wrapper_end = '</div>';
+        $icon_position_style = $icon_position === 'left' ? 'left: 10px;' : 'right: 10px;';
+        $icon_in_input = sprintf(
+            '<div style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            $icon_position_style,
+            $icon_html
+        );
+    }
+
+    $min_attr = !empty( $min_date ) ? sprintf( 'min="%s"', $min_date ) : '';
+    $max_attr = !empty( $max_date ) ? sprintf( 'max="%s"', $max_date ) : '';
+    $value_attr = !empty( $default_value ) ? sprintf( 'value="%s"', $default_value ) : '';
+
+    return sprintf(
+        '<div class="form-datepicker">
+            %s
+            %s
+            %s
+            <input type="date" id="%s" name="%s" class="ekwa-datepicker" %s %s %s %s placeholder="%s" style="%s"%s />
+            %s
+            %s
+        </div>',
+        $label_html,
+        $input_wrapper_start,
+        $icon_in_input,
+        $field_id,
+        $field_id,
+        $required,
+        $min_attr,
+        $max_attr,
+        $value_attr,
+        $placeholder,
+        $input_style,
+        $data_attributes,
+        $input_wrapper_end,
         $validation_html
     );
 }

@@ -200,7 +200,7 @@
         return isValid;
     }
 
-        // Replace the validateSingleField function with this corrected version:
+    // Replace the entire validateSingleField function with this corrected version:
 
     function validateSingleField(field, form) {
         if (!field || !field.hasAttribute('required')) {
@@ -227,6 +227,19 @@
                 isValid = false;
                 errorMessage = getValidationMessage(field, 'Please select an option.');
             }
+        } else if (field.type === 'email') {
+            // Special validation for email addresses
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = getValidationMessage(field, 'This field is required.');
+            } else {
+                // Check if it's a valid email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value.trim())) {
+                    isValid = false;
+                    errorMessage = getValidationMessage(field, 'Please enter a valid email address.');
+                }
+            }
         } else if (field.type === 'tel') {
             // Special validation for phone numbers
             if (!field.value.trim()) {
@@ -242,8 +255,60 @@
                     }
                 }
             }
+        } else if (field.type === 'url') {
+            // Special validation for URLs
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = getValidationMessage(field, 'This field is required.');
+            } else {
+                // Check if it's a valid URL format
+                try {
+                    new URL(field.value.trim());
+                } catch (e) {
+                    isValid = false;
+                    errorMessage = getValidationMessage(field, 'Please enter a valid URL (e.g., https://example.com).');
+                }
+            }
+        } else if (field.type === 'date') {
+            // Special validation for date fields
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = getValidationMessage(field, 'This field is required.');
+            } else {
+                // Check weekend restriction
+                if (field.hasAttribute('data-disable-weekends') && field.getAttribute('data-disable-weekends') === 'true') {
+                    const selectedDate = new Date(field.value);
+                    const dayOfWeek = selectedDate.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        isValid = false;
+                        errorMessage = getValidationMessage(field, 'Weekend dates are not allowed. Please select a weekday.');
+                    }
+                }
+
+                // Check past date restriction
+                if (field.hasAttribute('data-disable-past') && field.getAttribute('data-disable-past') === 'true') {
+                    const selectedDate = new Date(field.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+                    if (selectedDate < today) {
+                        isValid = false;
+                        errorMessage = getValidationMessage(field, 'Past dates are not allowed. Please select today or a future date.');
+                    }
+                }
+
+                // Check future date restriction
+                if (field.hasAttribute('data-disable-future') && field.getAttribute('data-disable-future') === 'true') {
+                    const selectedDate = new Date(field.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+                    if (selectedDate > today) {
+                        isValid = false;
+                        errorMessage = getValidationMessage(field, 'Future dates are not allowed. Please select today or a past date.');
+                    }
+                }
+            }
         } else {
-            // Text inputs, textareas, etc.
+            // Text inputs, textareas, number, password, etc.
             if (!field.value.trim()) {
                 isValid = false;
                 errorMessage = getValidationMessage(field, 'This field is required.');
@@ -259,7 +324,7 @@
     }
 
     function getValidationMessage(field, defaultMessage) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
         const validationSpan = fieldContainer ? fieldContainer.querySelector('.validation-message') : null;
 
         if (validationSpan && validationSpan.textContent.trim()) {
@@ -270,7 +335,7 @@
     }
 
     function showFieldError(field, message, form) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
 
         if (fieldContainer && form.contains(fieldContainer)) {
             fieldContainer.classList.add('has-error');
@@ -325,7 +390,7 @@
     }
 
     function clearFieldError(field, form) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
 
         if (fieldContainer && form.contains(fieldContainer)) {
             fieldContainer.classList.remove('has-error');
@@ -334,6 +399,12 @@
             const validationMessage = fieldContainer.querySelector('.validation-message');
             if (validationMessage) {
                 validationMessage.style.display = 'none';
+            }
+
+            // Clear date warnings as well
+            const dateWarning = fieldContainer.querySelector('.date-warning');
+            if (dateWarning) {
+                dateWarning.style.display = 'none';
             }
         }
     }

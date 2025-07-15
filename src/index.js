@@ -10,6 +10,7 @@ import './blocks/form-select';
 import './blocks/form-checkbox';
 import './blocks/form-radio';
 import './blocks/form-textarea';
+import './blocks/form-datepicker';
 
 // Register parent form builder block
 registerBlockType('ekwa-wufoo/form-builder', {
@@ -30,6 +31,10 @@ registerBlockType('ekwa-wufoo/form-builder', {
             type: 'string',
             default: ''
         },
+        ekwaUrl: {
+            type: 'string',
+            default: 'https://www.ekwa.com/ekwa-wufoo-handler/en.php'
+        },
         idStamp: {
             type: 'string',
             default: ''
@@ -43,7 +48,7 @@ registerBlockType('ekwa-wufoo/form-builder', {
             className: 'ekwa-wufoo-form-builder'
         });
 
-        const { formId, submitText, actionUrl, idStamp } = attributes;
+        const { formId, submitText, actionUrl, ekwaUrl, idStamp } = attributes;
 
         // Allow WordPress core blocks + form child blocks
         const ALLOWED_BLOCKS = [
@@ -61,7 +66,8 @@ registerBlockType('ekwa-wufoo/form-builder', {
             'ekwa-wufoo/form-checkbox',
             'ekwa-wufoo/form-radio',
             'ekwa-wufoo/form-textarea',
-            'ekwa-wufoo/form-checkbox-group'
+            'ekwa-wufoo/form-checkbox-group',
+            'ekwa-wufoo/form-datepicker'
         ];
 
         // Template with a basic layout example
@@ -96,10 +102,11 @@ registerBlockType('ekwa-wufoo/form-builder', {
                             help={__('Unique identifier for the form (used for id and name attributes)', 'ekwa-wufoo-form-builder')}
                         />
                         <TextControl
-                            label={__('Form Action URL', 'ekwa-wufoo-form-builder')}
-                            value={actionUrl}
-                            onChange={(value) => setAttributes({ actionUrl: value })}
-                            help={__('URL where the form data will be submitted (leave empty for current page)', 'ekwa-wufoo-form-builder')}
+                            label={__('Ekwa URL', 'ekwa-wufoo-form-builder')}
+                            value={ekwaUrl}
+                            onChange={(value) => setAttributes({ ekwaUrl: value })}
+                            help={__('URL where the form data will be submitted to Ekwa handler (required)', 'ekwa-wufoo-form-builder')}
+                            required={true}
                         />
                         <TextControl
                             label={__('Submit Button Text', 'ekwa-wufoo-form-builder')}
