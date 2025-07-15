@@ -109,6 +109,12 @@ registerBlockType('ekwa-wufoo/form-builder', {
                             required={true}
                         />
                         <TextControl
+                            label={__('Form Action URL', 'ekwa-wufoo-form-builder')}
+                            value={actionUrl}
+                            onChange={(value) => setAttributes({ actionUrl: value })}
+                            help={__('URL for encrypted hidden field (optional)', 'ekwa-wufoo-form-builder')}
+                        />
+                        <TextControl
                             label={__('Submit Button Text', 'ekwa-wufoo-form-builder')}
                             value={submitText}
                             onChange={(value) => setAttributes({ submitText: value })}

@@ -241,12 +241,33 @@ function ekwa_wufoo_form_builder_register_blocks() {
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
+// Encryption function for URL
+function encryptString($plaintext, $key, $cipherMethod) {
+    $ivLength = openssl_cipher_iv_length($cipherMethod);
+    $iv = openssl_random_pseudo_bytes($ivLength);
+    $encrypted = openssl_encrypt($plaintext, $cipherMethod, $key, 0, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
 // Render callback for parent form block
 function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $form_id = !empty( $attributes['formId'] ) ? esc_attr( $attributes['formId'] ) : 'ekwa-form-' . uniqid();
     $submit_text = !empty( $attributes['submitText'] ) ? esc_html( $attributes['submitText'] ) : 'Submit';
     $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : 'https://www.ekwa.com/ekwa-wufoo-handler/en.php';
     $id_stamp = !empty( $attributes['idStamp'] ) ? esc_attr( $attributes['idStamp'] ) : '';
+    $form_action_url = !empty( $attributes['actionUrl'] ) ? $attributes['actionUrl'] : '';
+
+    // Build encrypted URL hidden input if Form Action URL is provided
+    $encrypted_url_html = '';
+    if ( !empty( $form_action_url ) ) {
+        $key = "ozVu8SPWo2";
+        $cipherMethod = "AES-256-CBC";
+        $encrypted_url = encryptString($form_action_url, $key, $cipherMethod);
+        $encrypted_url_html = sprintf(
+            '<input type="hidden" name="url" value="%s">',
+            esc_attr($encrypted_url)
+        );
+    }
 
     // Build ID stamp HTML as hidden input if provided
     $id_stamp_html = '';
@@ -258,12 +279,13 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     }
 
     return sprintf(
-        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit"><button type="submit" class="submit-button primary">%s</button></div>%s</form></div>',
+        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit"><button type="submit" class="submit-button primary">%s</button></div>%s%s</form></div>',
         $form_id,
         $form_id,
         $action_url,
         $content,
         $submit_text,
+        $encrypted_url_html,
         $id_stamp_html
     );
 }
