@@ -195,3 +195,8 @@
 .ekwa-wufoo-form-builder label {
     font-weight:  normal !important;
 }
+.ekwawf-icon-wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

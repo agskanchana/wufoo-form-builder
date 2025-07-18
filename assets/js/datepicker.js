@@ -18,6 +18,31 @@
     }
 
     function setupDatepickerValidation(datepicker) {
+        // Ensure the datepicker opens on focus and click
+        datepicker.addEventListener('focus', function(e) {
+            // Force the datepicker to open by triggering a click if needed
+            if (e.target.type === 'date') {
+                try {
+                    e.target.showPicker();
+                } catch (error) {
+                    // showPicker() is not supported in all browsers, fallback to click
+                    console.log('showPicker not supported, using click fallback');
+                }
+            }
+        });
+
+        datepicker.addEventListener('click', function(e) {
+            // Ensure the datepicker opens when clicked anywhere on the input
+            if (e.target.type === 'date') {
+                try {
+                    e.target.showPicker();
+                } catch (error) {
+                    // showPicker() is not supported in all browsers
+                    console.log('showPicker not supported in this browser');
+                }
+            }
+        });
+
         // Add change event listener to validate selected date
         datepicker.addEventListener('change', function(e) {
             const selectedDate = new Date(e.target.value);

@@ -357,11 +357,11 @@ function ekwa_wufoo_form_input_render( $attributes ) {
     $icon_in_input = '';
 
     if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
-        $input_wrapper_start = '<div style="position: relative; display: flex; align-items: center;">';
+        $input_wrapper_start = '<div class="ekwawf-input-wrapper" style="position: relative; display: flex; align-items: center;">';
         $input_wrapper_end = '</div>';
         $icon_position_style = $icon_position === 'left' ? 'left: 10px;' : 'right: 10px;';
         $icon_in_input = sprintf(
-            '<div style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            '<div class="ekwawf-icon-wrapper" style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
             $icon_position_style,
             $icon_html
         );
@@ -511,7 +511,7 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
     $textarea_style = '';
     if ( $icon_html && ($icon_position === 'top-left' || $icon_position === 'top-right') ) {
         $padding_side = $icon_position === 'top-left' ? 'padding-left' : 'padding-right';
-        $textarea_style = sprintf('style="padding-top: 35px; %s: 35px;"', $padding_side);
+        $textarea_style = sprintf('style="padding-top: 10px; %s: 35px;"', $padding_side);
     }
 
     $textarea_wrapper_start = '';
@@ -736,7 +736,7 @@ function ekwa_wufoo_form_checkbox_group_render( $attributes ) {
         );
     } else {
         // Without label - no border, just padding
-        $fieldset_style = 'border: none; padding: 15px; margin: 0;';
+        $fieldset_style = 'border: none; padding: 15px; margin: 0; padding-left: 0;';
         $legend_html = '';
     }
 
