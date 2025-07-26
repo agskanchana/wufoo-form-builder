@@ -28,12 +28,22 @@
     font-weight: bold;
     color: #333;
 }
-
+.form-input input,
+.form-select select,
+.form-datepicker input {
+    height: 40px;
+}
+.ekwa-wufoo-form-builder .wp-block-columns{
+    margin: 0 !important;
+}
+.ekwa-wufoo-form-builder .wp-block-column{
+    padding: 0 !important;
+}
 .form-input input,
 .form-select select,
 .form-textarea textarea {
     width: 100%;
-    padding: 10px;
+    padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
