@@ -324,7 +324,7 @@
     }
 
     function getValidationMessage(field, defaultMessage) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker, .form-privacy-checkbox');
         const validationSpan = fieldContainer ? fieldContainer.querySelector('.validation-message') : null;
 
         if (validationSpan && validationSpan.textContent.trim()) {
@@ -335,7 +335,7 @@
     }
 
     function showFieldError(field, message, form) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker, .form-privacy-checkbox');
 
         if (fieldContainer && form.contains(fieldContainer)) {
             fieldContainer.classList.add('has-error');
@@ -390,7 +390,7 @@
     }
 
     function clearFieldError(field, form) {
-        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker');
+        const fieldContainer = field.closest('.form-input, .form-select, .form-textarea, .form-checkbox, .form-radio, .form-datepicker, .form-privacy-checkbox');
 
         if (fieldContainer && form.contains(fieldContainer)) {
             fieldContainer.classList.remove('has-error');

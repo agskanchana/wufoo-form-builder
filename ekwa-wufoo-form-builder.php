@@ -128,6 +128,22 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'idStamp' => array(
                 'type' => 'string',
                 'default' => ''
+            ),
+            'submitButtonStyle' => array(
+                'type' => 'string',
+                'default' => 'default'
+            ),
+            'submitButtonColor' => array(
+                'type' => 'string',
+                'default' => '#007cba'
+            ),
+            'submitButtonTextColor' => array(
+                'type' => 'string',
+                'default' => '#ffffff'
+            ),
+            'submitButtonAlignment' => array(
+                'type' => 'string',
+                'default' => 'left'
             )
         )
     ) );
@@ -238,6 +254,19 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'iconSvgContent' => array('type' => 'string', 'default' => '')
         )
     ) );
+
+    // Register privacy checkbox block
+    register_block_type( 'ekwa-wufoo/form-privacy-checkbox', array(
+        'render_callback' => 'ekwa_wufoo_form_privacy_checkbox_render',
+        'attributes' => array(
+            'fieldId' => array('type' => 'string', 'default' => ''),
+            'privacyText' => array('type' => 'string', 'default' => 'By submitting the above form you agree and accept our Privacy Policy.*'),
+            'privacyUrl' => array('type' => 'string', 'default' => ''),
+            'linkText' => array('type' => 'string', 'default' => 'Privacy Policy'),
+            'required' => array('type' => 'boolean', 'default' => true),
+            'validationMessage' => array('type' => 'string', 'default' => 'You must accept the privacy policy to continue.')
+        )
+    ) );
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
@@ -253,9 +282,13 @@ function encryptString($plaintext, $key, $cipherMethod) {
 function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $form_id = !empty( $attributes['formId'] ) ? esc_attr( $attributes['formId'] ) : 'ekwa-form-' . uniqid();
     $submit_text = !empty( $attributes['submitText'] ) ? esc_html( $attributes['submitText'] ) : 'Submit';
-    $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : 'https://www.ekwa.com/ekwa-wufoo-handler/en.php';
+    $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : 'https://www.ekwa.com/ekwa-wufoo-handler/en-no-recaptcha.php';
     $id_stamp = !empty( $attributes['idStamp'] ) ? esc_attr( $attributes['idStamp'] ) : '';
     $form_action_url = !empty( $attributes['actionUrl'] ) ? $attributes['actionUrl'] : '';
+    $submit_button_style = !empty( $attributes['submitButtonStyle'] ) ? esc_attr( $attributes['submitButtonStyle'] ) : 'default';
+    $submit_button_color = !empty( $attributes['submitButtonColor'] ) ? esc_attr( $attributes['submitButtonColor'] ) : '#007cba';
+    $submit_button_text_color = !empty( $attributes['submitButtonTextColor'] ) ? esc_attr( $attributes['submitButtonTextColor'] ) : '#ffffff';
+    $submit_button_alignment = !empty( $attributes['submitButtonAlignment'] ) ? esc_attr( $attributes['submitButtonAlignment'] ) : 'left';
 
     // Build encrypted URL hidden input if Form Action URL is provided
     $encrypted_url_html = '';
@@ -279,11 +312,16 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     }
 
     return sprintf(
-        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit"><button type="submit" class="submit-button primary">%s</button></div>%s%s</form></div>',
+        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit" style="text-align: %s;"><button type="submit" class="submit-button primary submit-%s" style="background-color: %s; color: %s; border-color: %s;">%s</button></div>%s%s</form></div>',
         $form_id,
         $form_id,
         $action_url,
         $content,
+        $submit_button_alignment,
+        $submit_button_style,
+        $submit_button_color,
+        $submit_button_text_color,
+        $submit_button_style === 'outline' ? $submit_button_color : 'transparent',
         $submit_text,
         $encrypted_url_html,
         $id_stamp_html
@@ -868,6 +906,47 @@ function ekwa_wufoo_form_datepicker_render( $attributes ) {
         $input_style,
         $data_attributes,
         $input_wrapper_end,
+        $validation_html
+    );
+}
+
+// Privacy Checkbox Render Function
+function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
+    $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'privacy-checkbox-' . uniqid();
+    $privacy_text = $attributes['privacyText'];
+    $privacy_url = !empty( $attributes['privacyUrl'] ) ? esc_url( $attributes['privacyUrl'] ) : '';
+    $link_text = esc_html( $attributes['linkText'] );
+    $required = $attributes['required'] ? 'required' : '';
+    $validation_message = esc_html( $attributes['validationMessage'] );
+
+    $validation_html = '';
+    if ( $attributes['required'] && !empty( $validation_message ) ) {
+        $validation_html = sprintf(
+            '<span class="validation-message" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">%s</span>',
+            $validation_message
+        );
+    }
+
+    // Parse the privacy text to replace link text with actual link
+    $processed_text = $privacy_text;
+    if ( !empty( $privacy_url ) && !empty( $link_text ) ) {
+        // Replace the link text with actual link
+        $link_html = sprintf( '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', $privacy_url, $link_text );
+        $processed_text = str_replace( $link_text, $link_html, $privacy_text );
+    }
+
+    return sprintf(
+        '<div class="form-privacy-checkbox">
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 1.4;">
+                <input type="checkbox" id="%s" name="%s" value="1" %s style="margin-top: 2px; flex-shrink: 0;" />
+                <span>%s</span>
+            </label>
+            %s
+        </div>',
+        $field_id,
+        $field_id,
+        $required,
+        $processed_text,
         $validation_html
     );
 }

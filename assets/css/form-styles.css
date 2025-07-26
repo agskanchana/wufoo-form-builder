@@ -14,8 +14,9 @@
 .form-select,
 .form-textarea,
 .form-checkbox,
-.form-radio {
-    margin-bottom: 20px;
+.form-radio,
+.form-privacy-checkbox {
+    margin-bottom: 1rem;
     position: relative;
 }
 
@@ -68,6 +69,9 @@
 .form-checkbox-group.has-error fieldset {
     border-color: #dc3545 !important;
     background-color: #fff5f5;
+}
+.form-checkbox-group,.form-datepicker{
+    margin-bottom: 1rem;
 }
 
 /* Validation message styles */
@@ -130,6 +134,26 @@
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+}
+
+/* Submit button variants */
+.submit-rounded {
+    border-radius: 25px;
+}
+
+.submit-square {
+    border-radius: 0;
+}
+
+.submit-outline {
+    background: transparent !important;
+    border: 2px solid #007cba;
+    color: #007cba !important;
+}
+
+.submit-outline:hover {
+    background: #007cba !important;
+    color: white !important;
 }
 
 .submit-button:hover {
