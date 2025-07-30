@@ -196,12 +196,24 @@ registerBlockType('ekwa-wufoo/form-builder', {
         const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
         const { formId, submitText, actionUrl, ekwaUrl, idStamp, submitButtonStyle, submitButtonColor, submitButtonTextColor, submitButtonAlignment, selectedTemplate, hasContent } = attributes;
 
-        // Show template selection if no template is selected and no content exists
+        // Check if block has inner blocks when component mounts
         useEffect(() => {
+            const { getBlocks } = wp.data.select('core/block-editor');
+            const innerBlocks = getBlocks(clientId);
+
+            // If block has inner blocks, mark as having content
+            if (innerBlocks && innerBlocks.length > 0) {
+                if (!hasContent) {
+                    setAttributes({ hasContent: true });
+                }
+                return; // Don't show modal if already has content
+            }
+
+            // Only show modal for truly new blocks with no content and no template
             if (!selectedTemplate && !hasContent) {
                 setIsTemplateModalOpen(true);
             }
-        }, [selectedTemplate, hasContent]);
+        }, [clientId]); // Only run when clientId changes (component mount)
 
         const selectTemplate = (templateKey) => {
             setAttributes({

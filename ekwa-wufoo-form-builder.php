@@ -2,9 +2,10 @@
 
 /**
  * Plugin Name: EKWA Wufoo Form Builder
- * Description: A custom block for building forms using input and select elements.
- * Version: 1.0.0
- * Author: Your Name
+ * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
+ * Version: 1.0.5
+ * Author: Sameera Kanchana
+ * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
  */
 
@@ -12,6 +13,15 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+require 'includes/plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+	'https://github.com/agskanchana/wufoo-form-builder/',
+	__FILE__,
+	'ekwa-wufoo-form-builder'
+);
 
 // Define the plugin path.
 define( 'EKWA_WUFOO_FORM_BUILDER_PATH', plugin_dir_path( __FILE__ ) );
@@ -270,8 +280,8 @@ function ekwa_wufoo_form_builder_register_blocks() {
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
 
-// Encryption function for URL
-function encryptString($plaintext, $key, $cipherMethod) {
+// Encryption function for URL - renamed to avoid conflicts
+function ekwa_wufoo_encrypt_string($plaintext, $key, $cipherMethod) {
     $ivLength = openssl_cipher_iv_length($cipherMethod);
     $iv = openssl_random_pseudo_bytes($ivLength);
     $encrypted = openssl_encrypt($plaintext, $cipherMethod, $key, 0, $iv);
@@ -295,7 +305,7 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     if ( !empty( $form_action_url ) ) {
         $key = "ozVu8SPWo2";
         $cipherMethod = "AES-256-CBC";
-        $encrypted_url = encryptString($form_action_url, $key, $cipherMethod);
+        $encrypted_url = ekwa_wufoo_encrypt_string($form_action_url, $key, $cipherMethod);
         $encrypted_url_html = sprintf(
             '<input type="hidden" name="url" value="%s">',
             esc_attr($encrypted_url)
