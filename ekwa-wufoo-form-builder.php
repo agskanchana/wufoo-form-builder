@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.0.5
+ * Version: 1.0.7
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -273,6 +273,7 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'privacyText' => array('type' => 'string', 'default' => 'By submitting the above form you agree and accept our Privacy Policy.*'),
             'privacyUrl' => array('type' => 'string', 'default' => ''),
             'linkText' => array('type' => 'string', 'default' => 'Privacy Policy'),
+            'value' => array('type' => 'string', 'default' => 'I Agree'),
             'required' => array('type' => 'boolean', 'default' => true),
             'validationMessage' => array('type' => 'string', 'default' => 'You must accept the privacy policy to continue.')
         )
@@ -926,6 +927,7 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
     $privacy_text = $attributes['privacyText'];
     $privacy_url = !empty( $attributes['privacyUrl'] ) ? esc_url( $attributes['privacyUrl'] ) : '';
     $link_text = esc_html( $attributes['linkText'] );
+    $value = !empty( $attributes['value'] ) ? esc_attr( $attributes['value'] ) : 'I Agree';
     $required = $attributes['required'] ? 'required' : '';
     $validation_message = esc_html( $attributes['validationMessage'] );
 
@@ -940,7 +942,7 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
     // Parse the privacy text to replace link text with actual link
     $processed_text = $privacy_text;
     if ( !empty( $privacy_url ) && !empty( $link_text ) ) {
-        // Replace the link text with actual link
+        // Replace the link text with actual link - opens in new tab
         $link_html = sprintf( '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', $privacy_url, $link_text );
         $processed_text = str_replace( $link_text, $link_html, $privacy_text );
     }
@@ -948,13 +950,14 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
     return sprintf(
         '<div class="form-privacy-checkbox">
             <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 1.4;">
-                <input type="checkbox" id="%s" name="%s" value="1" %s style="margin-top: 2px; flex-shrink: 0;" />
+                <input type="checkbox" id="%s" name="%s" value="%s" %s style="margin-top: 2px; flex-shrink: 0;" />
                 <span>%s</span>
             </label>
             %s
         </div>',
         $field_id,
         $field_id,
+        $value,
         $required,
         $processed_text,
         $validation_html

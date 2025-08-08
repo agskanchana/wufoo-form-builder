@@ -27,6 +27,10 @@ registerBlockType('ekwa-wufoo/form-privacy-checkbox', {
             type: 'string',
             default: 'Privacy Policy'
         },
+        value: {
+            type: 'string',
+            default: 'I Agree'
+        },
         checked: {
             type: 'boolean',
             default: false

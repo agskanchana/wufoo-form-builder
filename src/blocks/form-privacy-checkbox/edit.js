@@ -17,6 +17,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
         privacyText,
         privacyUrl,
         linkText,
+        value,
         checked,
         required,
         validationMessage
@@ -91,6 +92,13 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         value={linkText}
                         onChange={(value) => setAttributes({ linkText: value })}
                         help={__('The text that should be linked (must match text in Privacy Text above)', 'ekwa-wufoo-form-builder')}
+                    />
+
+                    <TextControl
+                        label={__('Checkbox Value', 'ekwa-wufoo-form-builder')}
+                        value={value}
+                        onChange={(value) => setAttributes({ value: value })}
+                        help={__('The value that will be submitted when the checkbox is checked', 'ekwa-wufoo-form-builder')}
                     />
 
                     <div style={{ marginBottom: '16px' }}>
@@ -208,6 +216,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         type="checkbox"
                         id={fieldId || 'privacy-checkbox'}
                         name={fieldId || 'privacy-checkbox'}
+                        value={value}
                         checked={checked}
                         onChange={handleCheckboxToggle}
                         style={{
