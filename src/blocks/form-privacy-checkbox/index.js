@@ -10,6 +10,7 @@ registerBlockType('ekwa-wufoo/form-privacy-checkbox', {
     supports: {
         reusable: false,
     },
+    version: '1.1.0',
     attributes: {
         fieldId: {
             type: 'string',

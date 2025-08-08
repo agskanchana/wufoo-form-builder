@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.0.8
+ * Version: 1.1.0
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -280,6 +280,52 @@ function ekwa_wufoo_form_builder_register_blocks() {
     ) );
 }
 add_action( 'init', 'ekwa_wufoo_form_builder_register_blocks' );
+
+// Force block content regeneration for privacy checkbox links
+add_filter( 'render_block', 'ekwa_wufoo_force_privacy_link_target_blank', 10, 2 );
+
+function ekwa_wufoo_force_privacy_link_target_blank( $block_content, $block ) {
+    // Only apply to our privacy checkbox blocks
+    if ( isset( $block['blockName'] ) && $block['blockName'] === 'ekwa-wufoo/form-privacy-checkbox' ) {
+        // Force target="_blank" for any links that don't have it
+        $block_content = preg_replace(
+            '/<a([^>]*?)href="([^"]*?)"(?![^>]*target=)([^>]*?)>/',
+            '<a$1href="$2" target="_blank" rel="noopener noreferrer"$3>',
+            $block_content
+        );
+
+        // Also fix links that have target="_self"
+        $block_content = str_replace('target="_self"', 'target="_blank"', $block_content);
+    }
+
+    return $block_content;
+}
+
+// Clear any object cache and force block re-render on plugin activation
+register_activation_hook( __FILE__, 'ekwa_wufoo_clear_block_cache' );
+
+function ekwa_wufoo_clear_block_cache() {
+    // Clear object cache
+    if ( function_exists( 'wp_cache_flush' ) ) {
+        wp_cache_flush();
+    }
+
+    // Clear any page caching
+    if ( function_exists( 'w3tc_flush_all' ) ) {
+        w3tc_flush_all(); // W3 Total Cache
+    }
+
+    if ( function_exists( 'wp_cache_clear_cache' ) ) {
+        wp_cache_clear_cache(); // WP Super Cache
+    }
+
+    if ( function_exists( 'rocket_clean_domain' ) ) {
+        rocket_clean_domain(); // WP Rocket
+    }
+
+    // Update option to track plugin version for migration
+    update_option( 'ekwa_wufoo_plugin_version', '1.1.0' );
+}
 
 // Encryption function for URL - renamed to avoid conflicts
 function ekwa_wufoo_encrypt_string($plaintext, $key, $cipherMethod) {
