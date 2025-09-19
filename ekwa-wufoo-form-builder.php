@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -55,8 +55,14 @@ add_action( 'enqueue_block_editor_assets', 'ekwa_wufoo_form_builder_editor_asset
 
 // Enqueue frontend and editor shared styles (BOTH frontend and editor)
 function ekwa_wufoo_form_builder_shared_assets() {
-    // Only enqueue on pages that have the form block OR in the editor
-    if ( has_block('ekwa-wufoo/form-builder') || is_admin() ) {
+    // Check if conditional loading is enabled (default: true)
+    $conditional_loading = get_option( 'ekwa_wufoo_conditional_assets', true );
+
+    // If conditional loading is disabled, always enqueue assets
+    // If conditional loading is enabled, only enqueue on pages that have the form block OR in the editor
+    $should_enqueue = !$conditional_loading || has_block('ekwa-wufoo/form-builder') || is_admin();
+
+    if ( $should_enqueue ) {
         // STYLE.CSS - Shared frontend and editor styles
         $css_file = EKWA_WUFOO_FORM_BUILDER_PATH . 'build/style.css';
         if ( file_exists( $css_file ) ) {
@@ -73,8 +79,14 @@ add_action( 'enqueue_block_assets', 'ekwa_wufoo_form_builder_shared_assets' );
 
 // Enqueue frontend-only assets
 function ekwa_wufoo_form_builder_frontend_assets() {
-    // Only enqueue on frontend pages that have the form block (NOT in admin)
-    if ( !is_admin() && has_block('ekwa-wufoo/form-builder') ) {
+    // Check if conditional loading is enabled (default: true)
+    $conditional_loading = get_option( 'ekwa_wufoo_conditional_assets', true );
+
+    // If conditional loading is disabled, always enqueue on frontend (NOT in admin)
+    // If conditional loading is enabled, only enqueue on frontend pages that have the form block
+    $should_enqueue = !is_admin() && (!$conditional_loading || has_block('ekwa-wufoo/form-builder'));
+
+    if ( $should_enqueue ) {
         // Form validation JavaScript
         wp_enqueue_script(
             'ekwa-form-validation',
@@ -324,7 +336,7 @@ function ekwa_wufoo_clear_block_cache() {
     }
 
     // Update option to track plugin version for migration
-    update_option( 'ekwa_wufoo_plugin_version', '1.1.0' );
+    update_option( 'ekwa_wufoo_plugin_version', '1.1.1' );
 }
 
 // Encryption function for URL - renamed to avoid conflicts
@@ -1008,6 +1020,143 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
         $processed_text,
         $validation_html
     );
+}
+
+// Add admin menu for plugin settings
+add_action( 'admin_menu', 'ekwa_wufoo_admin_menu' );
+
+function ekwa_wufoo_admin_menu() {
+    add_options_page(
+        'Wufoo Form Builder Settings',  // Page title
+        'Wufoo Form Builder',           // Menu title
+        'manage_options',               // Capability
+        'ekwa-wufoo-settings',          // Menu slug
+        'ekwa_wufoo_settings_page'      // Callback function
+    );
+}
+
+// Settings page callback
+function ekwa_wufoo_settings_page() {
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+
+        <form method="post" action="options.php">
+            <?php
+            settings_fields( 'ekwa_wufoo_settings_group' );
+            do_settings_sections( 'ekwa-wufoo-settings' );
+            submit_button();
+            ?>
+        </form>
+    </div>
+    <?php
+}
+
+// Initialize settings
+add_action( 'admin_init', 'ekwa_wufoo_settings_init' );
+
+function ekwa_wufoo_settings_init() {
+    // Register settings
+    register_setting(
+        'ekwa_wufoo_settings_group',
+        'ekwa_wufoo_conditional_assets',
+        array(
+            'type' => 'boolean',
+            'default' => true,
+            'sanitize_callback' => 'rest_sanitize_boolean'
+        )
+    );
+
+    // Add settings section
+    add_settings_section(
+        'ekwa_wufoo_performance_section',
+        'Performance Settings',
+        'ekwa_wufoo_performance_section_callback',
+        'ekwa-wufoo-settings'
+    );
+
+    // Add conditional assets field
+    add_settings_field(
+        'ekwa_wufoo_conditional_assets',
+        'Conditional Assets Loading',
+        'ekwa_wufoo_conditional_assets_callback',
+        'ekwa-wufoo-settings',
+        'ekwa_wufoo_performance_section'
+    );
+}
+
+// Section description
+function ekwa_wufoo_performance_section_callback() {
+    echo '<p>Configure performance and loading options for the Wufoo Form Builder plugin.</p>';
+}
+
+// Conditional assets field callback
+function ekwa_wufoo_conditional_assets_callback() {
+    $value = get_option( 'ekwa_wufoo_conditional_assets', true );
+    ?>
+    <label class="toggle-switch">
+        <input type="checkbox"
+               name="ekwa_wufoo_conditional_assets"
+               value="1"
+               <?php checked( $value, true ); ?> />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">Enable conditional loading of CSS and JS assets</span>
+    </label>
+    <p class="description">
+        When enabled, CSS and JS files will only load on pages that contain Wufoo form blocks.
+        When disabled, assets will load on all pages for maximum compatibility.
+    </p>
+
+    <style>
+    .toggle-switch {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toggle-switch input[type="checkbox"] {
+        opacity: 0;
+        position: absolute;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: relative;
+        width: 50px;
+        height: 24px;
+        background-color: #ccc;
+        border-radius: 12px;
+        transition: background-color 0.3s;
+        cursor: pointer;
+    }
+
+    .toggle-slider:before {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        top: 2px;
+        left: 2px;
+        background-color: white;
+        transition: transform 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #0073aa;
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    .toggle-label {
+        font-weight: 500;
+    }
+    </style>
+    <?php
 }
 
 ?>
