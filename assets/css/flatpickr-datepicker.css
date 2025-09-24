@@ -1,0 +1,187 @@
+/**
+ * Flatpickr Datepicker Styles
+ * Ensures consistent styling with other form fields
+ */
+
+/* Base styling for datepicker input - consistent before and after Flatpickr */
+.ekwa-datepicker,
+.ekwa-datepicker-placeholder {
+    width: 100% !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    padding: 10px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Ensure consistent styling when Flatpickr is active */
+.flatpickr-input,
+.flatpickr-input.form-control,
+.flatpickr-input.form-control.input {
+    width: 100% !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    padding: 10px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.3s ease !important;
+}
+
+/* Override any Flatpickr default styling that might conflict */
+.flatpickr-input[readonly] {
+    background-color: #fff !important;
+    cursor: pointer !important;
+}
+
+/* Focus state consistency - same for both states */
+.ekwa-datepicker:focus,
+.ekwa-datepicker-placeholder:focus,
+.flatpickr-input:focus {
+    border-color: #0073aa !important;
+    box-shadow: 0 0 0 1px #0073aa !important;
+    outline: none !important;
+}
+
+/* Disabled state */
+.ekwa-datepicker:disabled,
+.ekwa-datepicker-placeholder:disabled,
+.flatpickr-input:disabled {
+    background-color: #f7f7f7 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Custom theme adjustments for Flatpickr calendar */
+.flatpickr-calendar {
+    font-family: inherit !important;
+    font-size: 14px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+}
+
+/* Today button styling */
+.flatpickr-calendar .flatpickr-current-month {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+/* Selected date styling */
+.flatpickr-calendar .flatpickr-day.selected {
+    background: #0073aa !important;
+    border-color: #0073aa !important;
+    color: white !important;
+}
+
+.flatpickr-calendar .flatpickr-day.selected:hover {
+    background: #005a87 !important;
+    border-color: #005a87 !important;
+}
+
+/* Today's date styling */
+.flatpickr-calendar .flatpickr-day.today {
+    border-color: #0073aa !important;
+    color: #0073aa !important;
+}
+
+.flatpickr-calendar .flatpickr-day.today:hover {
+    background: #0073aa !important;
+    color: white !important;
+}
+
+/* Disabled dates styling */
+.flatpickr-calendar .flatpickr-day.flatpickr-disabled {
+    color: #ccc !important;
+    cursor: not-allowed !important;
+}
+
+/* Weekend dates (if not disabled) */
+.flatpickr-calendar .flatpickr-day.weekend:not(.flatpickr-disabled) {
+    color: #666 !important;
+}
+
+/* Navigation arrows */
+.flatpickr-calendar .flatpickr-prev-month,
+.flatpickr-calendar .flatpickr-next-month {
+    color: #0073aa !important;
+}
+
+.flatpickr-calendar .flatpickr-prev-month:hover,
+.flatpickr-calendar .flatpickr-next-month:hover {
+    color: #005a87 !important;
+}
+
+/* Form container adjustments */
+.form-datepicker {
+    position: relative;
+}
+
+.form-datepicker .date-warning {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    margin-top: 2px;
+}
+
+/* Loading state styling - before Flatpickr loads */
+.ekwa-datepicker[data-flatpickr-loading],
+.ekwa-datepicker-placeholder[data-flatpickr-loading] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 11-6.219-8.56'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 16px 16px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flatpickr-calendar {
+        font-size: 16px !important; /* Prevent zoom on mobile */
+    }
+
+    .ekwa-datepicker,
+    .ekwa-datepicker-placeholder,
+    .flatpickr-input {
+        font-size: 16px !important; /* Prevent zoom on mobile */
+    }
+}
+
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .flatpickr-calendar {
+        border-width: 0.5px !important;
+    }
+}
+
+/* Dark mode support (if theme supports it) */
+@media (prefers-color-scheme: dark) {
+    .flatpickr-calendar {
+        background: #2c2c2c !important;
+        border-color: #444 !important;
+        color: #fff !important;
+    }
+
+    .flatpickr-calendar .flatpickr-day {
+        color: #fff !important;
+    }
+
+    .flatpickr-calendar .flatpickr-day:hover {
+        background: #444 !important;
+    }
+
+    .ekwa-datepicker,
+    .ekwa-datepicker-placeholder,
+    .flatpickr-input {
+        background: #2c2c2c !important;
+        border-color: #444 !important;
+        color: #fff !important;
+    }
+}

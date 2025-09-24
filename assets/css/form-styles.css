@@ -33,6 +33,9 @@
 .form-datepicker input {
     height: 40px;
 }
+ .form-datepicker input{
+    padding-left: 35px !important;
+ }
 .ekwa-wufoo-form-builder .wp-block-columns{
     margin: 0 !important;
 }

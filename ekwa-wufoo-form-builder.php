@@ -105,13 +105,21 @@ function ekwa_wufoo_form_builder_frontend_assets() {
             true
         );
 
-        // Datepicker JavaScript
+        // Datepicker JavaScript (Flatpickr with lazy loading)
         wp_enqueue_script(
-            'ekwa-datepicker',
-            plugins_url('assets/js/datepicker.js', __FILE__),
+            'ekwa-flatpickr-datepicker',
+            plugins_url('assets/js/flatpickr-datepicker.js', __FILE__),
             array(),
-            filemtime(plugin_dir_path(__FILE__) . 'assets/js/datepicker.js'),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/js/flatpickr-datepicker.js'),
             true
+        );
+
+        // Flatpickr custom styles
+        wp_enqueue_style(
+            'ekwa-flatpickr-styles',
+            plugins_url('assets/css/flatpickr-datepicker.css', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'assets/css/flatpickr-datepicker.css')
         );
 
         // Form styles
@@ -958,7 +966,7 @@ function ekwa_wufoo_form_datepicker_render( $attributes ) {
             %s
             %s
             %s
-            <input type="date" id="%s" name="%s" class="ekwa-datepicker" %s %s %s %s placeholder="%s" style="%s"%s />
+            <input type="text" id="%s" name="%s" class="ekwa-datepicker" %s %s %s %s placeholder="%s" style="%s" readonly%s />
             %s
             %s
         </div>',
