@@ -551,7 +551,9 @@ function ekwa_wufoo_form_select_render( $attributes ) {
     $select_style = '';
     if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
         $padding_side = $icon_position === 'left' ? 'padding-left' : 'padding-right';
-        $select_style = sprintf('style="%s: 35px;"', $padding_side);
+        $select_style = sprintf('style="%s: 45px; padding-right: 40px;"', $padding_side);
+    } else {
+        $select_style = 'style="padding-right: 40px;"'; // Default padding for dropdown arrow
     }
 
     $select_wrapper_start = '';
@@ -559,11 +561,11 @@ function ekwa_wufoo_form_select_render( $attributes ) {
     $icon_in_select = '';
 
     if ( $icon_html && ($icon_position === 'left' || $icon_position === 'right') ) {
-        $select_wrapper_start = '<div style="position: relative; display: flex; align-items: center;">';
+        $select_wrapper_start = '<div class="ekwawf-input-wrapper" style="position: relative; display: block;">';
         $select_wrapper_end = '</div>';
-        $icon_position_style = $icon_position === 'left' ? 'left: 10px;' : 'right: 10px;';
+        $icon_position_style = $icon_position === 'left' ? 'left: 12px;' : 'right: 52px;';
         $icon_in_select = sprintf(
-            '<div class="ekwawf-icon-wrapper" style="position: absolute; %s z-index: 1; pointer-events: none;">%s</div>',
+            '<div class="ekwawf-icon-wrapper" style="%s">%s</div>',
             $icon_position_style,
             $icon_html
         );
