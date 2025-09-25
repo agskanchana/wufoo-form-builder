@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.1.3
+ * Version: 1.1.4
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -514,7 +514,7 @@ function ekwa_wufoo_form_select_render( $attributes ) {
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
     $options_array = explode( ',', $options_string );
-    $options_html = '<option value="">Select an option...</option>';
+    $options_html = '<option value="" disabled selected>Select an option...</option>';
 
     foreach ( $options_array as $option ) {
         $option = trim( $option );
@@ -572,7 +572,7 @@ function ekwa_wufoo_form_select_render( $attributes ) {
     }
 
     return sprintf(
-        '<div class="form-select">%s%s%s<select id="%s" name="%s" %s %s>%s</select>%s%s</div>',
+        '<div class="form-select">%s%s%s<select id="%s" name="%s" %s %s required>%s</select>%s%s</div>',
         $label_html,
         $select_wrapper_start,
         $icon_in_select,

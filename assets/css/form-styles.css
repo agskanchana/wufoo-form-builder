@@ -69,11 +69,29 @@
     cursor: pointer;
     color: #333 !important;
     -webkit-text-fill-color: #333 !important; /* Force text color on iOS WebKit */
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 .form-select select option {
     color: #333 !important;
     background-color: #fff !important;
+}
+
+/* Placeholder styling for select */
+.form-select select option:first-child {
+    color: #999 !important;
+    font-style: italic;
+}
+
+.form-select select:invalid {
+    color: #999 !important;
+    -webkit-text-fill-color: #999 !important;
+}
+
+.form-select select:valid {
+    color: #333 !important;
+    -webkit-text-fill-color: #333 !important;
 }
 
 /* iOS specific fixes */
@@ -82,14 +100,24 @@
         font-size: 16px !important; /* Prevent zoom on iOS */
         color: #333 !important;
         -webkit-appearance: none !important;
+        appearance: none !important;
         background-color: #fff !important;
         -webkit-text-fill-color: #333 !important; /* Force text color on iOS */
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .form-select select:invalid {
+        color: #999 !important;
+        -webkit-text-fill-color: #999 !important;
     }
 
     /* Fix icon positioning when there's a left icon */
     .form-select .ekwawf-input-wrapper select {
         padding-left: 45px !important;
         padding-right: 40px !important;
+        width: 100% !important;
     }
 
     /* Adjust icon positioning for better alignment */
@@ -99,9 +127,7 @@
         top: 50%;
         transform: translateY(-50%);
     }
-}
-
-/* Additional iOS and mobile browser fixes */
+}/* Additional iOS and mobile browser fixes */
 select::-webkit-input-placeholder {
     color: #999 !important;
 }
@@ -317,11 +343,26 @@ select:-ms-input-placeholder {
 @media (max-width: 768px) {
     .form-select select {
         font-size: 16px !important; /* Prevent zoom */
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-select select:invalid {
+        color: #999 !important;
+        -webkit-text-fill-color: #999 !important;
+    }
+
+    .form-select select:valid {
+        color: #333 !important;
+        -webkit-text-fill-color: #333 !important;
     }
 
     /* Better spacing for mobile touch targets */
     .form-select .ekwawf-input-wrapper {
         min-height: 44px; /* iOS recommended touch target */
+        width: 100% !important;
     }
 
     .form-select select {
