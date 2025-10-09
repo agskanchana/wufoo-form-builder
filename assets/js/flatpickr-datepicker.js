@@ -125,6 +125,7 @@
             clickOpens: true,
             altInput: true,
             altFormat: 'F j, Y',
+            disableMobile: true, // Force same input field on both mobile and desktop
             onChange: function(selectedDates, dateStr, instance) {
                 // Custom validation after date selection
                 validateDateSelection(datepicker, selectedDates[0], instance);

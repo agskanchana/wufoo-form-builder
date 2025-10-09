@@ -154,6 +154,47 @@
     }
 }
 
+/* Force same input on mobile and desktop - disable mobile mode */
+.flatpickr-mobile {
+    display: none !important;
+}
+
+input.flatpickr-input[type="hidden"] + input.flatpickr-mobile {
+    display: none !important;
+}
+
+/* Datepicker responsive styles for screens smaller than 545px */
+@media (max-width: 545px) {
+    .ekwa-datepicker,
+    .ekwa-datepicker-placeholder,
+    .flatpickr-input,
+    .form-datepicker input {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        display: block !important;
+        box-sizing: border-box !important;
+    }
+
+    .form-datepicker {
+        width: 100% !important;
+        display: block !important;
+    }
+
+    /* Ensure wrapper doesn't restrict width */
+    .form-datepicker .ekwawf-input-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+    }
+
+    /* Make Flatpickr calendar full width on small screens */
+    .flatpickr-calendar {
+        width: 100% !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+}
+
 /* High DPI / Retina displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .flatpickr-calendar {
