@@ -19,7 +19,8 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
         validationMessage,
         iconName,
         iconPosition,
-        iconSvgContent
+        iconSvgContent,
+        minCharacters
     } = attributes;
 
     const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
@@ -117,6 +118,14 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                         min={2}
                         max={20}
                         help={__('Number of visible text lines', 'ekwa-wufoo-form-builder')}
+                    />
+                    <RangeControl
+                        label={__('Minimum Characters', 'ekwa-wufoo-form-builder')}
+                        value={minCharacters}
+                        onChange={(value) => setAttributes({ minCharacters: value })}
+                        min={0}
+                        max={500}
+                        help={__('Minimum number of characters required (0 to disable)', 'ekwa-wufoo-form-builder')}
                     />
                     <ToggleControl
                         label={__('Required Field', 'ekwa-wufoo-form-builder')}

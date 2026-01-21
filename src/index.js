@@ -1,6 +1,6 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { InnerBlocks, useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { TextControl, PanelBody, SelectControl, ColorPalette, Button, Modal } from '@wordpress/components';
+import { TextControl, PanelBody, SelectControl, ColorPalette, Button, Modal, ToggleControl, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { Fragment, useState, useEffect } from '@wordpress/element';
 
@@ -183,6 +183,10 @@ registerBlockType('ekwa-wufoo/form-builder', {
         hasContent: {
             type: 'boolean',
             default: false
+        },
+        enableRecaptcha: {
+            type: 'boolean',
+            default: false
         }
     },
     supports: {
@@ -194,7 +198,7 @@ registerBlockType('ekwa-wufoo/form-builder', {
         });
 
         const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-        const { formId, submitText, actionUrl, ekwaUrl, idStamp, submitButtonStyle, submitButtonColor, submitButtonTextColor, submitButtonAlignment, selectedTemplate, hasContent } = attributes;
+        const { formId, submitText, actionUrl, ekwaUrl, idStamp, submitButtonStyle, submitButtonColor, submitButtonTextColor, submitButtonAlignment, selectedTemplate, hasContent, enableRecaptcha } = attributes;
 
         // Check if block has inner blocks when component mounts
         useEffect(() => {
@@ -430,6 +434,34 @@ registerBlockType('ekwa-wufoo/form-builder', {
                             help={__('ID stamp code to be inserted after submit button', 'ekwa-wufoo-form-builder')}
                         />
                     </PanelBody>
+
+                    <PanelBody title={__('reCAPTCHA Settings', 'ekwa-wufoo-form-builder')} initialOpen={false}>
+                        <ToggleControl
+                            label={__('Enable reCAPTCHA', 'ekwa-wufoo-form-builder')}
+                            checked={enableRecaptcha}
+                            onChange={(value) => setAttributes({ enableRecaptcha: value })}
+                            help={__('Show "I\'m not a robot" checkbox to prevent spam submissions', 'ekwa-wufoo-form-builder')}
+                        />
+                        {enableRecaptcha && (
+                            <div style={{
+                                padding: '12px',
+                                backgroundColor: '#f0f0f0',
+                                borderRadius: '4px',
+                                marginTop: '12px'
+                            }}>
+                                <p style={{ margin: '0 0 8px 0', fontSize: '13px' }}>
+                                    <strong>{__('Note:', 'ekwa-wufoo-form-builder')}</strong>
+                                </p>
+                                <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                                    {__('Make sure to configure your Google reCAPTCHA v2 Site Key in', 'ekwa-wufoo-form-builder')}
+                                    {' '}
+                                    <a href="/wp-admin/options-general.php?page=ekwa-wufoo-settings" target="_blank">
+                                        {__('Settings → Wufoo Form Builder', 'ekwa-wufoo-form-builder')}
+                                    </a>
+                                </p>
+                            </div>
+                        )}
+                    </PanelBody>
                 </InspectorControls>
                 <div {...blockProps}>
                     <form id={formId || 'ekwa-form'} name={formId || 'ekwa-form'}>
@@ -438,6 +470,40 @@ registerBlockType('ekwa-wufoo/form-builder', {
                             template={selectedTemplate ? TEMPLATE : undefined}
                             templateLock={false}
                         />
+                        {enableRecaptcha && (
+                            <div className="ekwa-recaptcha-preview" style={{
+                                border: '1px solid #d3d3d3',
+                                borderRadius: '3px',
+                                backgroundColor: '#f9f9f9',
+                                padding: '12px 14px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '16px',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                            }}>
+                                <div style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    border: '2px solid #c1c1c1',
+                                    borderRadius: '3px',
+                                    backgroundColor: '#fff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                </div>
+                                <span style={{ fontSize: '14px', color: '#4a4a4a' }}>{__("I'm not a robot", 'ekwa-wufoo-form-builder')}</span>
+                                <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <svg width="32" height="32" viewBox="0 0 64 64">
+                                        <path fill="#1c3aa9" d="M32 0L0 32l32 32l32-32z"/>
+                                        <path fill="#4285f4" d="M32 4L4 32l28 28l28-28z"/>
+                                        <path fill="#fff" d="M28 38l-8-8l4-4l4 4l12-12l4 4z"/>
+                                    </svg>
+                                    <span style={{ fontSize: '8px', color: '#9b9b9b', marginTop: '2px' }}>reCAPTCHA</span>
+                                </div>
+                            </div>
+                        )}
                         <div className="form-submit" style={{ textAlign: submitButtonAlignment }}>
                             <button
                                 type="button"

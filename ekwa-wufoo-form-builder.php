@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -129,6 +129,28 @@ function ekwa_wufoo_form_builder_frontend_assets() {
             array(),
             filemtime(plugin_dir_path(__FILE__) . 'assets/css/form-styles.css')
         );
+
+        // reCAPTCHA JavaScript (only if site key is configured)
+        $recaptcha_site_key = get_option( 'ekwa_wufoo_recaptcha_site_key', '' );
+        if ( !empty( $recaptcha_site_key ) ) {
+            // Google reCAPTCHA API script
+            wp_enqueue_script(
+                'google-recaptcha',
+                'https://www.google.com/recaptcha/api.js?onload=ekwaRecaptchaOnLoad&render=explicit',
+                array(),
+                null,
+                true
+            );
+
+            // Our reCAPTCHA validation script
+            wp_enqueue_script(
+                'ekwa-recaptcha',
+                plugins_url('assets/js/recaptcha.js', __FILE__),
+                array('google-recaptcha'),
+                filemtime(plugin_dir_path(__FILE__) . 'assets/js/recaptcha.js'),
+                true
+            );
+        }
     }
 }
 add_action( 'wp_enqueue_scripts', 'ekwa_wufoo_form_builder_frontend_assets' );
@@ -174,6 +196,10 @@ function ekwa_wufoo_form_builder_register_blocks() {
             'submitButtonAlignment' => array(
                 'type' => 'string',
                 'default' => 'left'
+            ),
+            'enableRecaptcha' => array(
+                'type' => 'boolean',
+                'default' => false
             )
         )
     ) );
@@ -366,6 +392,7 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $submit_button_color = !empty( $attributes['submitButtonColor'] ) ? esc_attr( $attributes['submitButtonColor'] ) : '#007cba';
     $submit_button_text_color = !empty( $attributes['submitButtonTextColor'] ) ? esc_attr( $attributes['submitButtonTextColor'] ) : '#ffffff';
     $submit_button_alignment = !empty( $attributes['submitButtonAlignment'] ) ? esc_attr( $attributes['submitButtonAlignment'] ) : 'left';
+    $enable_recaptcha = !empty( $attributes['enableRecaptcha'] ) ? $attributes['enableRecaptcha'] : false;
 
     // Build encrypted URL hidden input if Form Action URL is provided
     $encrypted_url_html = '';
@@ -388,12 +415,30 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
         );
     }
 
+    // Build reCAPTCHA HTML if enabled
+    $recaptcha_html = '';
+    if ( $enable_recaptcha ) {
+        $site_key = get_option( 'ekwa_wufoo_recaptcha_site_key', '' );
+        if ( !empty( $site_key ) ) {
+            $recaptcha_html = sprintf(
+                '<div class="ekwa-recaptcha-wrapper" style="margin-bottom: 16px;"><div class="g-recaptcha" data-sitekey="%s" data-callback="ekwaRecaptchaCallback" data-expired-callback="ekwaRecaptchaExpired"></div><div class="recaptcha-error" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">Please complete the reCAPTCHA verification.</div></div>',
+                esc_attr( $site_key )
+            );
+        }
+    }
+
+    // Honeypot field for spam protection (hidden from humans, bots will fill it)
+    $honeypot_html = '<div style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true"><label for="website_url_' . $form_id . '">Website</label><input type="text" name="website_url" id="website_url_' . $form_id . '" tabindex="-1" autocomplete="off" value=""></div>';
+
     return sprintf(
-        '<div class="ekwa-wufoo-form-builder"><form id="%s" name="%s" method="post" action="%s">%s<div class="form-submit" style="text-align: %s;"><button type="submit" class="submit-button primary submit-%s" style="background-color: %s; color: %s; border-color: %s;">%s</button></div>%s%s</form></div>',
+        '<div class="ekwa-wufoo-form-builder" data-recaptcha="%s"><form id="%s" name="%s" method="post" action="%s">%s%s%s<div class="form-submit" style="text-align: %s;"><button type="submit" class="submit-button primary submit-%s" style="background-color: %s; color: %s; border-color: %s;">%s</button></div>%s%s</form></div>',
+        $enable_recaptcha ? 'true' : 'false',
         $form_id,
         $form_id,
         $action_url,
+        $honeypot_html,
         $content,
+        $recaptcha_html,
         $submit_button_alignment,
         $submit_button_style,
         $submit_button_color,
@@ -597,6 +642,7 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
     $icon_name = !empty( $attributes['iconName'] ) ? $attributes['iconName'] : '';
     $icon_position = !empty( $attributes['iconPosition'] ) ? $attributes['iconPosition'] : 'above';
     $icon_svg_content = !empty( $attributes['iconSvgContent'] ) ? $attributes['iconSvgContent'] : '';
+    $min_characters = isset( $attributes['minCharacters'] ) ? intval( $attributes['minCharacters'] ) : 10;
 
     $required_indicator = $attributes['required'] ? ' <span style="color: red;">*</span>' : '';
 
@@ -646,8 +692,16 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
         );
     }
 
+    // Build minlength attributes
+    $minlength_attr = '';
+    $min_chars_data = '';
+    if ( $min_characters > 0 ) {
+        $minlength_attr = sprintf('minlength="%d"', $min_characters);
+        $min_chars_data = sprintf('data-min-characters="%d"', $min_characters);
+    }
+
     return sprintf(
-        '<div class="form-textarea">%s%s%s<textarea id="%s" name="%s" placeholder="%s" rows="%d" %s %s></textarea>%s%s</div>',
+        '<div class="form-textarea">%s%s%s<textarea id="%s" name="%s" placeholder="%s" rows="%d" %s %s %s %s></textarea>%s%s</div>',
         $label_html,
         $textarea_wrapper_start,
         $icon_in_textarea,
@@ -656,6 +710,8 @@ function ekwa_wufoo_form_textarea_render( $attributes ) {
         $placeholder,
         $rows,
         $required,
+        $minlength_attr,
+        $min_chars_data,
         $textarea_style,
         $textarea_wrapper_end,
         $validation_html
@@ -1077,11 +1133,40 @@ function ekwa_wufoo_settings_init() {
         )
     );
 
+    // Register reCAPTCHA settings
+    register_setting(
+        'ekwa_wufoo_settings_group',
+        'ekwa_wufoo_recaptcha_site_key',
+        array(
+            'type' => 'string',
+            'default' => '',
+            'sanitize_callback' => 'sanitize_text_field'
+        )
+    );
+
+    register_setting(
+        'ekwa_wufoo_settings_group',
+        'ekwa_wufoo_recaptcha_secret_key',
+        array(
+            'type' => 'string',
+            'default' => '',
+            'sanitize_callback' => 'sanitize_text_field'
+        )
+    );
+
     // Add settings section
     add_settings_section(
         'ekwa_wufoo_performance_section',
         'Performance Settings',
         'ekwa_wufoo_performance_section_callback',
+        'ekwa-wufoo-settings'
+    );
+
+    // Add reCAPTCHA settings section
+    add_settings_section(
+        'ekwa_wufoo_recaptcha_section',
+        'Google reCAPTCHA Settings',
+        'ekwa_wufoo_recaptcha_section_callback',
         'ekwa-wufoo-settings'
     );
 
@@ -1093,11 +1178,60 @@ function ekwa_wufoo_settings_init() {
         'ekwa-wufoo-settings',
         'ekwa_wufoo_performance_section'
     );
+
+    // Add reCAPTCHA site key field
+    add_settings_field(
+        'ekwa_wufoo_recaptcha_site_key',
+        'reCAPTCHA Site Key',
+        'ekwa_wufoo_recaptcha_site_key_callback',
+        'ekwa-wufoo-settings',
+        'ekwa_wufoo_recaptcha_section'
+    );
+
+    // Add reCAPTCHA secret key field
+    add_settings_field(
+        'ekwa_wufoo_recaptcha_secret_key',
+        'reCAPTCHA Secret Key',
+        'ekwa_wufoo_recaptcha_secret_key_callback',
+        'ekwa-wufoo-settings',
+        'ekwa_wufoo_recaptcha_section'
+    );
 }
 
 // Section description
 function ekwa_wufoo_performance_section_callback() {
     echo '<p>Configure performance and loading options for the Wufoo Form Builder plugin.</p>';
+}
+
+// reCAPTCHA section description
+function ekwa_wufoo_recaptcha_section_callback() {
+    echo '<p>Configure Google reCAPTCHA v2 "I\'m not a robot" checkbox. <a href="https://www.google.com/recaptcha/admin" target="_blank">Get your reCAPTCHA keys here</a>.</p>';
+}
+
+// reCAPTCHA site key field callback
+function ekwa_wufoo_recaptcha_site_key_callback() {
+    $value = get_option( 'ekwa_wufoo_recaptcha_site_key', '' );
+    ?>
+    <input type="text"
+           name="ekwa_wufoo_recaptcha_site_key"
+           value="<?php echo esc_attr( $value ); ?>"
+           class="regular-text"
+           placeholder="Enter your reCAPTCHA Site Key" />
+    <p class="description">Enter your Google reCAPTCHA v2 Site Key (public key).</p>
+    <?php
+}
+
+// reCAPTCHA secret key field callback
+function ekwa_wufoo_recaptcha_secret_key_callback() {
+    $value = get_option( 'ekwa_wufoo_recaptcha_secret_key', '' );
+    ?>
+    <input type="password"
+           name="ekwa_wufoo_recaptcha_secret_key"
+           value="<?php echo esc_attr( $value ); ?>"
+           class="regular-text"
+           placeholder="Enter your reCAPTCHA Secret Key" />
+    <p class="description">Enter your Google reCAPTCHA v2 Secret Key (private key). This is kept secure and never exposed publicly.</p>
+    <?php
 }
 
 // Conditional assets field callback

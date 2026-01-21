@@ -46,6 +46,10 @@ registerBlockType('ekwa-wufoo/form-textarea', {
         iconSvgContent: {
             type: 'string',
             default: ''
+        },
+        minCharacters: {
+            type: 'number',
+            default: 10
         }
     },
     edit: Edit,

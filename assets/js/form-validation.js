@@ -203,15 +203,30 @@
     // Replace the entire validateSingleField function with this corrected version:
 
     function validateSingleField(field, form) {
-        if (!field || !field.hasAttribute('required')) {
-            return true;
-        }
-
         let isValid = true;
         let errorMessage = '';
 
         // Clear previous errors for this field only
         clearFieldError(field, form);
+
+        // Check minimum characters for textareas (even if not required, but only if there's content)
+        if (field.tagName.toLowerCase() === 'textarea') {
+            var minChars = field.getAttribute('data-min-characters');
+            if (minChars && parseInt(minChars) > 0 && field.value.trim().length > 0) {
+                var charCount = field.value.trim().length;
+                if (charCount < parseInt(minChars)) {
+                    isValid = false;
+                    errorMessage = 'Please enter at least ' + minChars + ' characters. Currently: ' + charCount + ' characters.';
+                    showFieldError(field, errorMessage, form);
+                    return isValid;
+                }
+            }
+        }
+
+        // If field is not required and empty, it's valid
+        if (!field.hasAttribute('required')) {
+            return true;
+        }
 
         // Validate based on field type
         if (field.type === 'checkbox') {
@@ -312,6 +327,16 @@
             if (!field.value.trim()) {
                 isValid = false;
                 errorMessage = getValidationMessage(field, 'This field is required.');
+            } else if (field.tagName.toLowerCase() === 'textarea') {
+                // Check minimum character limit for textareas
+                var minChars = field.getAttribute('data-min-characters');
+                if (minChars && parseInt(minChars) > 0) {
+                    var charCount = field.value.trim().length;
+                    if (charCount < parseInt(minChars)) {
+                        isValid = false;
+                        errorMessage = 'Please enter at least ' + minChars + ' characters. Currently: ' + charCount + ' characters.';
+                    }
+                }
             }
         }
 
