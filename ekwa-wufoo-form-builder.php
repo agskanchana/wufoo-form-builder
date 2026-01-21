@@ -3,7 +3,7 @@
 /**
  * Plugin Name: EKWA Wufoo Form Builder
  * Description: he EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows users to create custom forms using a block-based interface.
- * Version: 1.1.6
+ * Version: 1.1.7
  * Author: Sameera Kanchana
  * Author URI: mailto:agskanchana@gmail.com
  * License: GPL2
@@ -385,7 +385,6 @@ function ekwa_wufoo_encrypt_string($plaintext, $key, $cipherMethod) {
 function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $form_id = !empty( $attributes['formId'] ) ? esc_attr( $attributes['formId'] ) : 'ekwa-form-' . uniqid();
     $submit_text = !empty( $attributes['submitText'] ) ? esc_html( $attributes['submitText'] ) : 'Submit';
-    $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : 'https://www.ekwa.com/ekwa-wufoo-handler/en-no-recaptcha.php';
     $id_stamp = !empty( $attributes['idStamp'] ) ? esc_attr( $attributes['idStamp'] ) : '';
     $form_action_url = !empty( $attributes['actionUrl'] ) ? $attributes['actionUrl'] : '';
     $submit_button_style = !empty( $attributes['submitButtonStyle'] ) ? esc_attr( $attributes['submitButtonStyle'] ) : 'default';
@@ -393,6 +392,12 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $submit_button_text_color = !empty( $attributes['submitButtonTextColor'] ) ? esc_attr( $attributes['submitButtonTextColor'] ) : '#ffffff';
     $submit_button_alignment = !empty( $attributes['submitButtonAlignment'] ) ? esc_attr( $attributes['submitButtonAlignment'] ) : 'left';
     $enable_recaptcha = !empty( $attributes['enableRecaptcha'] ) ? $attributes['enableRecaptcha'] : false;
+
+    // Set action URL based on reCAPTCHA status
+    $default_ekwa_url = $enable_recaptcha 
+        ? 'https://www.ekwa.com/ekwa-wufoo-handler/en-with-recaptcha.php' 
+        : 'https://www.ekwa.com/ekwa-wufoo-handler/en-no-recaptcha.php';
+    $action_url = !empty( $attributes['ekwaUrl'] ) ? esc_url( $attributes['ekwaUrl'] ) : $default_ekwa_url;
 
     // Build encrypted URL hidden input if Form Action URL is provided
     $encrypted_url_html = '';
@@ -417,12 +422,24 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
 
     // Build reCAPTCHA HTML if enabled
     $recaptcha_html = '';
+    $recaptcha_secret_html = '';
     if ( $enable_recaptcha ) {
         $site_key = get_option( 'ekwa_wufoo_recaptcha_site_key', '' );
+        $secret_key = get_option( 'ekwa_wufoo_recaptcha_secret_key', '' );
         if ( !empty( $site_key ) ) {
             $recaptcha_html = sprintf(
                 '<div class="ekwa-recaptcha-wrapper" style="margin-bottom: 16px;"><div class="g-recaptcha" data-sitekey="%s" data-callback="ekwaRecaptchaCallback" data-expired-callback="ekwaRecaptchaExpired"></div><div class="recaptcha-error" style="color: #d94f4f; font-size: 12px; margin-top: 4px; display: none;">Please complete the reCAPTCHA verification.</div></div>',
                 esc_attr( $site_key )
+            );
+        }
+        // Send encrypted secret key for server-side verification
+        if ( !empty( $secret_key ) ) {
+            $key = "ozVu8SPWo2";
+            $cipherMethod = "AES-256-CBC";
+            $encrypted_secret = ekwa_wufoo_encrypt_string($secret_key, $key, $cipherMethod);
+            $recaptcha_secret_html = sprintf(
+                '<input type="hidden" name="recaptcha_key" value="%s">',
+                esc_attr($encrypted_secret)
             );
         }
     }
@@ -431,7 +448,7 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
     $honeypot_html = '<div style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true"><label for="website_url_' . $form_id . '">Website</label><input type="text" name="website_url" id="website_url_' . $form_id . '" tabindex="-1" autocomplete="off" value=""></div>';
 
     return sprintf(
-        '<div class="ekwa-wufoo-form-builder" data-recaptcha="%s"><form id="%s" name="%s" method="post" action="%s">%s%s%s<div class="form-submit" style="text-align: %s;"><button type="submit" class="submit-button primary submit-%s" style="background-color: %s; color: %s; border-color: %s;">%s</button></div>%s%s</form></div>',
+        '<div class="ekwa-wufoo-form-builder" data-recaptcha="%s"><form id="%s" name="%s" method="post" action="%s">%s%s%s<div class="form-submit" style="text-align: %s;"><button type="submit" class="submit-button primary submit-%s" style="background-color: %s; color: %s; border-color: %s;">%s</button></div>%s%s%s</form></div>',
         $enable_recaptcha ? 'true' : 'false',
         $form_id,
         $form_id,
@@ -446,7 +463,8 @@ function ekwa_wufoo_form_builder_render( $attributes, $content ) {
         $submit_button_style === 'outline' ? $submit_button_color : 'transparent',
         $submit_text,
         $encrypted_url_html,
-        $id_stamp_html
+        $id_stamp_html,
+        $recaptcha_secret_html
     );
 }
 

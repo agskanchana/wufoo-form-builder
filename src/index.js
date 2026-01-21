@@ -439,7 +439,12 @@ registerBlockType('ekwa-wufoo/form-builder', {
                         <ToggleControl
                             label={__('Enable reCAPTCHA', 'ekwa-wufoo-form-builder')}
                             checked={enableRecaptcha}
-                            onChange={(value) => setAttributes({ enableRecaptcha: value })}
+                            onChange={(value) => setAttributes({ 
+                                enableRecaptcha: value,
+                                ekwaUrl: value 
+                                    ? 'https://www.ekwa.com/ekwa-wufoo-handler/en-with-recaptcha.php'
+                                    : 'https://www.ekwa.com/ekwa-wufoo-handler/en-no-recaptcha.php'
+                            })}
                             help={__('Show "I\'m not a robot" checkbox to prevent spam submissions', 'ekwa-wufoo-form-builder')}
                         />
                         {enableRecaptcha && (
