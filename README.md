@@ -4,10 +4,13 @@ The EKWA Wufoo Form Builder is a comprehensive WordPress plugin that allows user
 
 ## Features
 
+
 ### Core Features
 - **Block-based form creation** using WordPress Gutenberg editor
 - **Wufoo integration** for form submission handling
 - **Real-time validation** with custom error messages
+- **Honeypot anti-spam field** (hidden field to trap bots)
+- **Google reCAPTCHA v2** support for spam prevention
 - **Icon support** via Iconify icons for enhanced visual appeal
 - **Multiple form templates** (Contact Form, Appointment Form, Blank Form)
 - **Responsive design** with mobile-friendly layouts
@@ -67,12 +70,15 @@ The form builder supports WordPress core layout blocks for flexible form design:
 - Group validation with custom messages
 - Individual checkbox ID management
 
+
 #### 6. Form Textarea (`ekwa-wufoo/form-textarea`)
-- Multi-line text input
+- Multi-line text input (e.g., comments field)
 - Configurable row height
 - Custom placeholders
 - Icon positioning (top-left, top-right, above)
 - Required field validation
+- **Minimum character validation** (set minimum characters required for comment fields)
+- Custom validation messages for required and minimum characters
 
 #### 7. Form Datepicker (`ekwa-wufoo/form-datepicker`)
 **Date restriction options:**
@@ -88,11 +94,13 @@ The form builder supports WordPress core layout blocks for flexible form design:
 - Required field validation
 - Custom validation messages
 
+
 #### 8. Form Privacy Checkbox (`ekwa-wufoo/form-privacy-checkbox`)
 - Privacy policy acceptance checkbox
 - Customizable privacy text
 - Privacy policy URL linking
 - Required field validation
+- **Custom validation messages for required checkbox**
 - Custom link text options
 
 ## Icon System
@@ -109,30 +117,40 @@ The form builder supports WordPress core layout blocks for flexible form design:
 - **Above**: Icons appear above the field label
 - **Top-left/Top-right**: For textarea fields
 
-## Custom Validation
 
-### Setting Up Validation
+### Custom Validation & Anti-Spam
+
+#### Setting Up Validation
 1. Select any form field block
 2. In the Inspector panel, find the field settings
 3. Toggle "Required Field" if needed
 4. Enter your custom validation message in "Validation Message"
-5. Messages appear when validation fails during form submission
+5. For textarea (comment) fields, set a minimum character count and a custom message for too-short input
+6. For checkboxes (including privacy), set a custom message for unchecked required boxes
+7. Messages appear when validation fails during form submission
 
-### Validation Features
+#### Validation Features
 - Real-time validation on field blur
 - Custom error messages for each field
 - Visual error states with red borders
 - Automatic error clearing on field interaction
 - Form-wide validation before submission
+- **Textarea (comment) field minimum character validation**
+- **Custom validation messages for required checkboxes**
 
-## Wufoo Integration Setup
+#### Anti-Spam Features
+- **Honeypot field**: A hidden field is included in every form. If filled, the submission is rejected as spam.
+- **Google reCAPTCHA v2**: Optionally enable reCAPTCHA for additional spam protection. Configure your site and secret keys in plugin settings.
 
-### Step 1: Create Wufoo Form
+
+### Wufoo Integration & Spam Protection
+
+#### Step 1: Create Wufoo Form
 1. Log into your Wufoo account
 2. Create a new form with matching field names
 3. Note down the form's integration details
 
-### Step 2: Configure Main Form Block
+#### Step 2: Configure Main Form Block
 Select the main "Ekwa Wufoo Form Builder" block and configure:
 
 **Required Settings:**
@@ -144,8 +162,13 @@ Select the main "Ekwa Wufoo Form Builder" block and configure:
 **Optional Settings:**
 - Submit button text, style, colors, and alignment
 - Form templates selection
+- **Enable Google reCAPTCHA**: Toggle reCAPTCHA for spam protection (requires site/secret keys)
 
-### Step 3: Configure Child Block Field IDs
+**Spam Protection:**
+- **Honeypot field**: Automatically included in every form (no setup needed)
+- **reCAPTCHA**: Enable in the main block and configure keys in plugin settings
+
+#### Step 3: Configure Child Block Field IDs
 For each form field block, set the **Field ID** to match your Wufoo form fields:
 
 **Examples:**
@@ -154,7 +177,7 @@ For each form field block, set the **Field ID** to match your Wufoo form fields:
 - Radio groups: `Field6` (group name)
 - Individual radio buttons: `Field6_1`, `Field6_2`, `Field6_3`
 - Checkboxes: `Field7`, `Field8`
-- Textarea: `Field9`
+- Textarea: `Field9` (e.g., comments field)
 - Date picker: `Field10`
 
 ## Form Templates
@@ -219,22 +242,27 @@ Empty template for custom form creation
 - Custom text colors
 - Button alignment options (left, center, right)
 
-## Validation & Error Handling
 
-### Client-side Validation
+### Validation & Error Handling
+
+#### Client-side Validation
 - Real-time field validation
 - Custom error message display
 - Visual error indicators
 - Automatic error clearing
 - Form-wide validation before submission
+- **Textarea (comment) field minimum character validation**
+- **Custom validation messages for required checkboxes**
 
-### Supported Validation Types
+#### Supported Validation Types
 - Required field validation
 - Email format validation
 - Phone number format validation
 - Date range validation
 - Checkbox group min/max selections
 - Radio group selection requirements
+- **Textarea minimum character validation**
+- **Custom validation messages for checkboxes**
 
 ## Browser Compatibility
 
@@ -251,6 +279,7 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 This project is licensed under the GPL v2 or later. See the license file for more details.
 
+
 ## Support
 
-For support with Wufoo integration or plugin functionality, please refer to the plugin documentation or contact the development team.
+For support with Wufoo integration, spam protection (honeypot, reCAPTCHA), or plugin functionality, please refer to the plugin documentation or contact the development team.
