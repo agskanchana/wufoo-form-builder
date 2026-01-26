@@ -165,21 +165,26 @@
             const firstCheckbox = checkboxes[0];
 
             if (firstCheckbox && firstCheckbox.hasAttribute('required')) {
-                const validationMessage = groupContainer ? groupContainer.querySelector('.validation-message') : null;
+                const validationMessageEl = groupContainer ? groupContainer.querySelector('.validation-message') : null;
 
                 const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
-                const minSelections = validationMessage ? parseInt(validationMessage.getAttribute('data-min-selections')) || 1 : 1;
-                const maxSelections = validationMessage ? parseInt(validationMessage.getAttribute('data-max-selections')) || 0 : 0;
+                const minSelections = validationMessageEl ? parseInt(validationMessageEl.getAttribute('data-min-selections')) || 1 : 1;
+                const maxSelections = validationMessageEl ? parseInt(validationMessageEl.getAttribute('data-max-selections')) || 0 : 0;
+
+                // Get custom validation message if available, otherwise use default
+                const customMessage = validationMessageEl && validationMessageEl.textContent.trim() ? validationMessageEl.textContent.trim() : '';
 
                 let groupIsValid = true;
-                let errorMessage = 'Please select at least one option.';
+                let errorMessage = '';
 
                 if (checkedCount < minSelections) {
                     groupIsValid = false;
-                    errorMessage = `Please select at least ${minSelections} option${minSelections > 1 ? 's' : ''}.`;
+                    // Use custom message if available, otherwise generate default
+                    errorMessage = customMessage || `Please select at least ${minSelections} option${minSelections > 1 ? 's' : ''}.`;
                 } else if (maxSelections > 0 && checkedCount > maxSelections) {
                     groupIsValid = false;
-                    errorMessage = `Please select no more than ${maxSelections} option${maxSelections > 1 ? 's' : ''}.`;
+                    // Use custom message if available, otherwise generate default
+                    errorMessage = customMessage || `Please select no more than ${maxSelections} option${maxSelections > 1 ? 's' : ''}.`;
                 }
 
                 if (!groupIsValid) {
