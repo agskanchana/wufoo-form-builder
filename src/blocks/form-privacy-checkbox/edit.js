@@ -16,6 +16,7 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
         fieldId,
         privacyText,
         privacyUrl,
+        opensInNewTab,
         linkText,
         value,
         checked,
@@ -52,8 +53,8 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                 {beforeLink}
                 <a
                     href={privacyUrl || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={opensInNewTab ? '_blank' : '_self'}
+                    rel={opensInNewTab ? 'noopener noreferrer' : undefined}
                     style={{
                         color: '#0073aa',
                         textDecoration: 'underline',
@@ -157,10 +158,13 @@ const Edit = ({ attributes, setAttributes, isSelected }) => {
                                     <LinkControl
                                         value={{
                                             url: privacyUrl,
-                                            opensInNewTab: true
+                                            opensInNewTab: opensInNewTab !== undefined ? opensInNewTab : true
                                         }}
                                         onChange={(newLink) => {
-                                            setAttributes({ privacyUrl: newLink?.url || '' });
+                                            setAttributes({
+                                                privacyUrl: newLink?.url || '',
+                                                opensInNewTab: newLink?.opensInNewTab !== undefined ? newLink.opensInNewTab : true
+                                            });
                                         }}
                                         onRemove={() => {
                                             setAttributes({ privacyUrl: '' });

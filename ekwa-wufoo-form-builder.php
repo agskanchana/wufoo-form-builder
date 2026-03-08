@@ -333,15 +333,16 @@ add_filter( 'render_block', 'ekwa_wufoo_force_privacy_link_target_blank', 10, 2 
 function ekwa_wufoo_force_privacy_link_target_blank( $block_content, $block ) {
     // Only apply to our privacy checkbox blocks
     if ( isset( $block['blockName'] ) && $block['blockName'] === 'ekwa-wufoo/form-privacy-checkbox' ) {
-        // Force target="_blank" for any links that don't have it
-        $block_content = preg_replace(
-            '/<a([^>]*?)href="([^"]*?)"(?![^>]*target=)([^>]*?)>/',
-            '<a$1href="$2" target="_blank" rel="noopener noreferrer"$3>',
-            $block_content
-        );
+        $opens_in_new_tab = isset( $block['attrs']['opensInNewTab'] ) ? $block['attrs']['opensInNewTab'] : true;
 
-        // Also fix links that have target="_self"
-        $block_content = str_replace('target="_self"', 'target="_blank"', $block_content);
+        if ( $opens_in_new_tab ) {
+            // Force target="_blank" for any links that don't have it
+            $block_content = preg_replace(
+                '/<a([^>]*?)href="([^"]*?)"(?![^>]*target=)([^>]*?)>/',
+                '<a$1href="$2" target="_blank" rel="noopener noreferrer"$3>',
+                $block_content
+            );
+        }
     }
 
     return $block_content;
@@ -1068,6 +1069,7 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
     $field_id = !empty( $attributes['fieldId'] ) ? esc_attr( $attributes['fieldId'] ) : 'privacy-checkbox-' . uniqid();
     $privacy_text = $attributes['privacyText'];
     $privacy_url = !empty( $attributes['privacyUrl'] ) ? esc_url( $attributes['privacyUrl'] ) : '';
+    $opens_in_new_tab = isset( $attributes['opensInNewTab'] ) ? $attributes['opensInNewTab'] : true;
     $link_text = esc_html( $attributes['linkText'] );
     $value = !empty( $attributes['value'] ) ? esc_attr( $attributes['value'] ) : 'I Agree';
     $required = $attributes['required'] ? 'required' : '';
@@ -1084,8 +1086,9 @@ function ekwa_wufoo_form_privacy_checkbox_render( $attributes ) {
     // Parse the privacy text to replace link text with actual link
     $processed_text = $privacy_text;
     if ( !empty( $privacy_url ) && !empty( $link_text ) ) {
-        // Replace the link text with actual link - opens in new tab
-        $link_html = sprintf( '<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>', $privacy_url, $link_text );
+        // Replace the link text with actual link
+        $target_attr = $opens_in_new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
+        $link_html = sprintf( '<a href="%s"%s>%s</a>', $privacy_url, $target_attr, $link_text );
         $processed_text = str_replace( $link_text, $link_html, $privacy_text );
     }
 

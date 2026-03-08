@@ -24,6 +24,10 @@ registerBlockType('ekwa-wufoo/form-privacy-checkbox', {
             type: 'string',
             default: ''
         },
+        opensInNewTab: {
+            type: 'boolean',
+            default: true
+        },
         linkText: {
             type: 'string',
             default: 'Privacy Policy'
