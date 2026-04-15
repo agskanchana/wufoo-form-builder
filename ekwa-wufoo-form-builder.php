@@ -18,7 +18,7 @@ require 'includes/plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
-	'https://github.com/agskanchana/wufoo-form-builder/',
+	'https://github.com/ekwamarketing/wufoo-form-builder/',
 	__FILE__,
 	'ekwa-wufoo-form-builder'
 );
